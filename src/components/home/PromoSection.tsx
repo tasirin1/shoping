@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/Card"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { Tag, Clock } from "lucide-react"
+import { formatCurrency } from "@/lib/utils"
 import type { PromoType } from "@/types"
 
 export function PromoSection() {
@@ -11,31 +12,23 @@ export function PromoSection() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchPromos = async () => {
+    const fetchData = async () => {
       try {
         const res = await fetch("/api/promos?active=true")
         const data = await res.json()
-        if (data.success) {
-          setPromos(data.data || [])
-        }
-      } catch {
-        // Silently fail
-      } finally {
-        setLoading(false)
-      }
+        if (data.success) setPromos(data.data || [])
+      } catch {} finally { setLoading(false) }
     }
-    fetchPromos()
+    fetchData()
   }, [])
 
   if (loading) {
     return (
-      <section className="py-16 md:py-24 bg-gray-50/50 dark:bg-gray-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Skeleton className="h-8 w-48 mb-8" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-32 rounded-2xl" />
-            ))}
+      <section className="py-8 md:py-12 bg-gray-50/50 dark:bg-gray-900/50">
+        <div className="max-w-7xl mx-auto px-4">
+          <Skeleton className="h-6 w-32 mb-5" />
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 w-64 rounded-2xl flex-shrink-0" />)}
           </div>
         </div>
       </section>
@@ -45,46 +38,37 @@ export function PromoSection() {
   if (promos.length === 0) return null
 
   return (
-    <section className="py-16 md:py-24 bg-gray-50/50 dark:bg-gray-900/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3 mb-8">
-          <Tag className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Promo Spesial
-          </h2>
+    <section className="py-8 md:py-12 bg-gray-50/50 dark:bg-gray-900/50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center gap-2 mb-5">
+          <Tag className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Promo</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
           {promos.map((promo) => (
-            <Card key={promo.id} hover>
-              <div className="flex items-start justify-between">
+            <div key={promo.id} className="flex-shrink-0 w-64">
+              <Card padding="sm" hover className="h-full">
                 <div className="space-y-2">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+                  <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-mono font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
                     {promo.code}
                   </span>
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                    {promo.name}
-                  </h3>
-                  {promo.description && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {promo.description}
-                    </p>
-                  )}
-                  <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                  <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">{promo.name}</p>
+                  <p className="text-lg font-bold text-primary-600 dark:text-primary-400">
                     {promo.discountType === "PERCENTAGE"
                       ? `${promo.discount}%`
-                      : `Rp${promo.discount.toLocaleString()}`}
-                    <span className="text-sm font-normal text-gray-400 ml-1">OFF</span>
+                      : formatCurrency(promo.discount)}
+                    <span className="text-xs font-normal text-gray-400 ml-1">OFF</span>
                   </p>
+                  {promo.endDate && (
+                    <div className="flex items-center gap-1 text-xs text-gray-400">
+                      <Clock className="w-3 h-3" />
+                      {new Date(promo.endDate).toLocaleDateString("id-ID")}
+                    </div>
+                  )}
                 </div>
-              </div>
-              {promo.endDate && (
-                <div className="flex items-center gap-1.5 mt-4 text-xs text-gray-400">
-                  <Clock className="w-3 h-3" />
-                  Berakhir: {new Date(promo.endDate).toLocaleDateString("id-ID")}
-                </div>
-              )}
-            </Card>
+              </Card>
+            </div>
           ))}
         </div>
       </div>

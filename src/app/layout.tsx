@@ -5,16 +5,11 @@ import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
 import { Providers } from "@/components/layout/Providers"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], display: "swap" })
 
 export const metadata: Metadata = {
-  title: {
-    default: "Shoping - Top Up Game Cepat & Aman",
-    template: "%s | Shoping",
-  },
-  description:
-    "Platform top up game terpercaya. Proses cepat, harga murah, dan banyak pilihan game.",
-  keywords: ["top up", "game", "voucher", "diamond", "ml", "ff", "pubg"],
+  title: "Shoping - Top Up Game",
+  description: "Top up game cepat & aman. Harga terbaik, proses instan.",
 }
 
 export default function RootLayout({

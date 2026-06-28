@@ -1,106 +1,65 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Zap, Shield, Clock, ArrowRight } from "lucide-react"
+import { Search, Zap, Shield, Clock } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 
-const heroImages = [
-  "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=1200&q=80",
-  "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&q=80",
-  "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&q=80",
+const features = [
+  { icon: Zap, label: "Proses Cepat", desc: "Hitungan detik" },
+  { icon: Shield, label: "100% Aman", desc: "Terpercaya" },
+  { icon: Clock, label: "24/7 Support", desc: "Bantuan" },
 ]
 
 export function HeroSection() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [currentImage, setCurrentImage] = useState(0)
+  const [search, setSearch] = useState("")
   const router = useRouter()
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % heroImages.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/games?search=${encodeURIComponent(searchQuery.trim())}`)
-    }
+    if (search.trim()) router.push(`/games?search=${encodeURIComponent(search.trim())}`)
   }
 
-  const features = [
-    {
-      icon: Zap,
-      title: "Proses Cepat",
-      description: "Top up dalam hitungan detik",
-    },
-    {
-      icon: Shield,
-      title: "Aman & Terpercaya",
-      description: "Pembayaran terenkripsi",
-    },
-    {
-      icon: Clock,
-      title: "24/7 Support",
-      description: "Bantuan kapan saja",
-    },
-  ]
-
   return (
-    <section className="relative min-h-[600px] md:min-h-[700px] flex items-center overflow-hidden">
-      {/* Background images */}
-      {heroImages.map((img, i) => (
-        <div
-          key={img}
-          className="absolute inset-0 transition-opacity duration-1000"
-          style={{
-            opacity: i === currentImage ? 1 : 0,
-            backgroundImage: `url(${img})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-      ))}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-      <div className="absolute inset-0 bg-gradient-to-r from-primary-900/30 to-transparent" />
+    <section className="relative pt-16 md:pt-20 overflow-hidden">
+      {/* Simplified gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-950 dark:to-primary-950/20" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary-100/50 dark:bg-primary-900/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-100/50 dark:bg-blue-900/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="max-w-2xl">
-          <div className="animate-fadeIn">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-500/20 text-primary-300 border border-primary-500/30 mb-6">
-              Platform Top Up Terpercaya
-            </span>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        <div className="max-w-2xl mx-auto text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium mb-4 border border-primary-200/50 dark:border-primary-800/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
+            Top Up Game Terpercaya
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 animate-slideUp">
+          {/* Title */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4">
             Top Up Game
             <br />
-            <span className="bg-gradient-to-r from-primary-400 to-primary-200 bg-clip-text text-transparent">
-              Cepat & Aman
-            </span>
+            <span className="text-primary-600 dark:text-primary-400">Cepat & Aman</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-xl animate-fadeIn">
-            Nikmati kemudahan top up game favoritmu dengan harga terbaik dan proses instan.
+          <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base mb-6 max-w-md mx-auto">
+            Isi ulang game favorit kamu dalam hitungan detik. Harga terbaik, proses instan.
           </p>
 
           {/* Search */}
-          <form onSubmit={handleSearch} className="relative max-w-xl mb-10 animate-slideUp">
-            <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden transition-all duration-300 focus-within:bg-white/20 focus-within:border-primary-400/50">
-              <Search className="ml-4 w-5 h-5 text-gray-400 flex-shrink-0" />
+          <form onSubmit={handleSearch} className="max-w-md mx-auto mb-8">
+            <div className="relative flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm transition-shadow focus-within:shadow-md focus-within:border-primary-400">
+              <Search className="ml-4 w-4 h-4 text-gray-400 flex-shrink-0" />
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari game yang ingin kamu top up..."
-                className="w-full bg-transparent px-4 py-4 text-white placeholder-gray-400 focus:outline-none text-sm"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Cari game..."
+                className="w-full bg-transparent px-3 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
               />
               <button
                 type="submit"
-                className="mr-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors"
+                className="mr-1.5 px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors"
               >
                 Cari
               </button>
@@ -108,26 +67,17 @@ export function HeroSection() {
           </form>
 
           {/* Features */}
-          <div className="flex flex-wrap gap-6 animate-slideUp">
-            {features.map((feature) => (
-              <div key={feature.title} className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <feature.icon className="w-5 h-5 text-primary-400" />
+          <div className="flex items-center justify-center gap-6 sm:gap-10">
+            {features.map((f) => (
+              <div key={f.label} className="text-center">
+                <div className="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center mx-auto mb-1.5">
+                  <f.icon className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white">{feature.title}</p>
-                  <p className="text-xs text-gray-400">{feature.description}</p>
-                </div>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{f.label}</p>
+                <p className="text-[10px] text-gray-400">{f.desc}</p>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-1.5">
-          <div className="w-1.5 h-3 rounded-full bg-white/60" />
         </div>
       </div>
     </section>
