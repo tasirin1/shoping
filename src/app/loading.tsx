@@ -1,4 +1,4 @@
-import { GameGridSkeleton } from "@/components/ui/Skeleton"
+import { HomeSkeleton } from "@/components/ui/Skeleton"
 
 export default function RootLoading() {
   return (
@@ -14,7 +14,7 @@ export default function RootLoading() {
 
       <div className="max-w-7xl mx-auto px-4">
         <div className="skeleton-pulse h-6 w-32 mb-5" />
-        <GameGridSkeleton />
+        <HomeSkeleton />
       </div>
     </div>
   )

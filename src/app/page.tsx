@@ -1,119 +1,98 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { HeroSection } from "@/components/home/HeroSection"
 import { GameCard } from "@/components/game/GameCard"
 import { PromoSection } from "@/components/home/PromoSection"
 import { FAQSection } from "@/components/home/FAQSection"
-import { GameGridSkeleton } from "@/components/ui/Skeleton"
-import { Button } from "@/components/ui/Button"
-import { ArrowRight, TrendingUp, Gamepad2 } from "lucide-react"
+import { HomeSkeleton } from "@/components/ui/Skeleton"
+import { ChevronRight, TrendingUp, Grid3X3 } from "lucide-react"
 import type { GameType } from "@/types"
 
 export default function HomePage() {
-  const [popularGames, setPopularGames] = useState<GameType[]>([])
-  const [allGames, setAllGames] = useState<GameType[]>([])
+  const [popular, setPopular] = useState<GameType[]>([])
+  const [all, setAll] = useState<GameType[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchGames = async () => {
       try {
-        const [popularRes, allRes] = await Promise.all([
+        const [pRes, aRes] = await Promise.all([
           fetch("/api/games?popular=true&limit=6"),
           fetch("/api/games?limit=8"),
         ])
-        const [popularData, allData] = await Promise.all([
-          popularRes.json(),
-          allRes.json(),
-        ])
-        if (popularData.success) setPopularGames(popularData.data || [])
-        if (allData.success) setAllGames(allData.data || [])
+        const pData = await pRes.json()
+        const aData = await aRes.json()
+        if (pData.success) setPopular(pData.data || [])
+        if (aData.success) setAll(aData.data || [])
       } catch {
-        // silent
+        setError("Gagal memuat game. Periksa koneksi.")
       } finally {
         setLoading(false)
       }
     }
-    fetchData()
+    fetchGames()
   }, [])
+
+  if (loading) return <HomeSkeleton />
 
   return (
     <>
       <HeroSection />
 
-      {/* Game Populer */}
+      {/* Popular Games */}
       <section className="py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-              <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">
-                Game Populer
-              </h2>
+              <TrendingUp className="w-5 h-5 text-primary-600" />
+              <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Game Populer</h2>
             </div>
-            <Link href="/games">
-              <Button variant="ghost" size="sm" className="text-xs">
-                Lihat Semua
-                <ArrowRight className="w-3 h-3 ml-1" />
-              </Button>
+            <Link href="/games" className="flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">
+              Lihat <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
-          {loading ? (
-            <GameGridSkeleton />
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {popularGames.map((game) => (
-                <GameCard key={game.id} game={game} />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+            {popular.map((game, i) => (
+              <GameCard key={game.id} game={game} index={i} />
+            ))}
+          </div>
         </div>
       </section>
 
+      {/* Promo */}
       <PromoSection />
 
-      {/* Semua Game */}
-      <section className="py-8 md:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2">
-              <Gamepad2 className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-              <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">
-                Semua Game
-              </h2>
+      {/* All Games */}
+      {all.length > 0 && (
+        <section className="py-8 md:py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <Grid3X3 className="w-5 h-5 text-primary-600" />
+                <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Semua Game</h2>
+              </div>
+              <Link href="/games" className="flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                Lihat <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
-            <Link href="/games">
-              <Button variant="ghost" size="sm" className="text-xs">
-                Lihat Semua
-                <ArrowRight className="w-3 h-3 ml-1" />
-              </Button>
-            </Link>
-          </div>
 
-          {loading ? (
-            <GameGridSkeleton />
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {allGames.map((game) => (
-                <GameCard key={game.id} game={game} />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+              {all.map((game, i) => (
+                <GameCard key={game.id} game={game} index={i} />
               ))}
             </div>
-          )}
-
-          <div className="text-center mt-6">
-            <Link href="/games">
-              <Button variant="outline" size="sm">
-                Lihat Semua Game
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <FAQSection />
+
+      {/* Footer spacing */}
+      <div className="h-4" />
     </>
   )
 }
