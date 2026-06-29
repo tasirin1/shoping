@@ -1,0 +1,31 @@
+[
+  {
+    "id": "b924e22a-428b-429c-bfc5-4bbaf37eb034",
+    "code": "WELCOME10",
+    "name": "Welcome 10%",
+    "description": "Diskon 10% pertama",
+    "discount": 10,
+    "discountType": "PERCENTAGE",
+    "maxDiscount": 50000,
+    "maxUses": 100,
+    "usedCount": 0,
+    "active": true,
+    "createdAt": "2026-06-29T01:02:23.870Z",
+    "updatedAt": "2026-06-29T01:02:23.870Z"
+  },
+  {
+    "id": "64530db7-f5d8-44c7-ade2-0e6909990f1f",
+    "code": "TOPUP20",
+    "name": "Top Up 20%",
+    "description": "Diskon 20% minimal Rp50rb",
+    "discount": 20,
+    "discountType": "PERCENTAGE",
+    "minPurchase": 50000,
+    "maxDiscount": 100000,
+    "maxUses": 50,
+    "usedCount": 0,
+    "active": true,
+    "createdAt": "2026-06-29T01:02:23.871Z",
+    "updatedAt": "2026-06-29T01:02:23.871Z"
+  }
+]

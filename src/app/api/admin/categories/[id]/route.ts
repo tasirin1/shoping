@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -7,7 +7,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const user = await getCurrentUser()
     if (!user || user.role !== "ADMIN") return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     const { id } = await params; const body = await request.json()
-    const data = await prisma.category.update({ where: { id }, data: body })
+    const data = await db.update("categories", id, body)
+    if (!data) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 })
     return NextResponse.json({ success: true, message: "Kategori diupdate", data })
   } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
 }
@@ -17,7 +18,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     const user = await getCurrentUser()
     if (!user || user.role !== "ADMIN") return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     const { id } = await params
-    await prisma.category.delete({ where: { id } })
+    await db.delete("categories", id)
     return NextResponse.json({ success: true, message: "Kategori dihapus" })
   } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
 }

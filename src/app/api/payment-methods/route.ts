@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/database"
 
 export async function GET() {
   try {
-    const data = await prisma.paymentMethod.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } })
-    return NextResponse.json({ success: true, data })
+    const data = await db.getAll("payments")
+    return NextResponse.json({ success: true, data: data.filter((p: any) => p.active !== false) })
   } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
 }

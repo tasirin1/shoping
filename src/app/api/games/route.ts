@@ -1,35 +1,32 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/database"
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const popular = searchParams.get("popular")
     const search = searchParams.get("search")
-    const category = searchParams.get("category")
     const limit = parseInt(searchParams.get("limit") || "50")
     const page = parseInt(searchParams.get("page") || "1")
+
+    let games = await db.getAll("games")
+    games = games.filter((g: any) => g.active !== false)
+
+    if (popular === "true") games = games.filter((g: any) => g.popular === true)
+    if (search) games = games.filter((g: any) => g.name.toLowerCase().includes(search.toLowerCase()))
+
+    // Attach nominals/products
+    const products = await db.getAll("products")
+    games = games.map((g: any) => ({
+      ...g,
+      nominals: products.filter((p: any) => p.gameId === g.id && p.active !== false),
+    }))
+
+    const total = games.length
+    const totalPages = Math.ceil(total / limit)
     const skip = (page - 1) * limit
 
-    const where: any = { active: true }
-    if (popular === "true") where.popular = true
-    if (search) where.name = { contains: search, mode: "insensitive" }
-    if (category) where.OR = [{ category }, { categoryId: category }]
-
-    const [games, total] = await Promise.all([
-      prisma.game.findMany({
-        where,
-        include: { nominals: { where: { active: true }, select: { id: true, name: true, amount: true, price: true } }, categoryRel: true },
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-        take: limit, skip,
-      }),
-      prisma.game.count({ where }),
-    ])
-
-    return NextResponse.json({
-      success: true, data: games,
-      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
-    })
+    return NextResponse.json({ success: true, data: games.slice(skip, skip + limit), pagination: { total, page, limit, totalPages } })
   } catch {
     return NextResponse.json({ success: false, error: "Gagal memuat game" }, { status: 500 })
   }

@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/database"
 
-export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(_: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await params
-    const game = await prisma.game.findUnique({
-      where: { slug },
-      include: { nominals: { where: { active: true }, orderBy: { price: "asc" } }, categoryRel: true },
-    })
+    const game = await db.findOne("games", "slug", slug)
     if (!game) return NextResponse.json({ success: false, error: "Game tidak ditemukan" }, { status: 404 })
+
+    const products = await db.getAll("products")
+    game.nominals = products.filter((p: any) => p.gameId === game.id && p.active !== false)
+
     return NextResponse.json({ success: true, data: game })
   } catch {
     return NextResponse.json({ success: false, error: "Error" }, { status: 500 })

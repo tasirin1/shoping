@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/database"
 
 export async function GET() {
   try {
-    const banners = await prisma.banner.findMany({
-      where: { active: true },
-      orderBy: { position: "asc" },
-    })
-
-    return NextResponse.json({ success: true, data: banners })
-  } catch {
-    return NextResponse.json(
-      { success: false, error: "Gagal memuat banner" },
-      { status: 500 }
-    )
-  }
+    const data = await db.getAll("banners")
+    return NextResponse.json({ success: true, data: data.filter((b: any) => b.active !== false).sort((a: any, b: any) => a.position - b.position) })
+  } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
 }

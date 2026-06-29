@@ -1,0 +1,56 @@
+[
+  {
+    "id": "90c61ce1-af39-4db8-bcbd-f52d805d475c",
+    "name": "QRIS",
+    "type": "QRIS",
+    "active": true,
+    "sortOrder": 0,
+    "createdAt": "2026-06-29T01:02:23.854Z",
+    "updatedAt": "2026-06-29T01:02:23.854Z"
+  },
+  {
+    "id": "61d0401c-0a80-48d8-bfcd-4224e8eef9d3",
+    "name": "GoPay",
+    "type": "EWALLET",
+    "active": true,
+    "sortOrder": 1,
+    "createdAt": "2026-06-29T01:02:23.855Z",
+    "updatedAt": "2026-06-29T01:02:23.855Z"
+  },
+  {
+    "id": "26694a52-2aec-48f2-a239-2b2d8f78ce3c",
+    "name": "OVO",
+    "type": "EWALLET",
+    "active": true,
+    "sortOrder": 2,
+    "createdAt": "2026-06-29T01:02:23.857Z",
+    "updatedAt": "2026-06-29T01:02:23.857Z"
+  },
+  {
+    "id": "54514537-3fd1-4cf8-a697-37d4578c3a42",
+    "name": "DANA",
+    "type": "EWALLET",
+    "active": true,
+    "sortOrder": 3,
+    "createdAt": "2026-06-29T01:02:23.859Z",
+    "updatedAt": "2026-06-29T01:02:23.859Z"
+  },
+  {
+    "id": "fea0f44a-66d4-4e52-b3be-bdff408f160b",
+    "name": "ShopeePay",
+    "type": "EWALLET",
+    "active": true,
+    "sortOrder": 4,
+    "createdAt": "2026-06-29T01:02:23.861Z",
+    "updatedAt": "2026-06-29T01:02:23.861Z"
+  },
+  {
+    "id": "5a163147-2e33-4a74-b2d8-5b557bb8b2a4",
+    "name": "BCA",
+    "type": "VIRTUAL_ACCOUNT",
+    "active": true,
+    "sortOrder": 5,
+    "createdAt": "2026-06-29T01:02:23.863Z",
+    "updatedAt": "2026-06-29T01:02:23.863Z"
+  }
+]

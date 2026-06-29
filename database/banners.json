@@ -1,0 +1,24 @@
+[
+  {
+    "id": "42fd70b2-cce8-4483-a04c-dbcb1ef27ca8",
+    "title": "Top Up Game",
+    "subtitle": "Cepat & Aman",
+    "image": "",
+    "link": "/games",
+    "position": 0,
+    "active": true,
+    "createdAt": "2026-06-29T01:02:23.874Z",
+    "updatedAt": "2026-06-29T01:02:23.874Z"
+  },
+  {
+    "id": "7ed4446e-606a-4614-a55b-72152a8cc1a0",
+    "title": "Promo Spesial",
+    "subtitle": "Diskon hingga 20%",
+    "image": "",
+    "link": "/games",
+    "position": 1,
+    "active": true,
+    "createdAt": "2026-06-29T01:02:23.874Z",
+    "updatedAt": "2026-06-29T01:02:23.874Z"
+  }
+]

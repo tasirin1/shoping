@@ -1,0 +1,32 @@
+[
+  {
+    "id": "0e1ab589-ed05-4396-89c0-4ae11a96b508",
+    "name": "MOBA",
+    "slug": "moba",
+    "icon": "",
+    "active": true,
+    "sortOrder": 0,
+    "createdAt": "2026-06-29T01:02:23.745Z",
+    "updatedAt": "2026-06-29T01:02:23.745Z"
+  },
+  {
+    "id": "903cdc5f-e856-48d5-b8ee-c2c376690081",
+    "name": "Battle Royale",
+    "slug": "battle-royale",
+    "icon": "",
+    "active": true,
+    "sortOrder": 1,
+    "createdAt": "2026-06-29T01:02:23.747Z",
+    "updatedAt": "2026-06-29T01:02:23.747Z"
+  },
+  {
+    "id": "db11f8c9-5b8e-4224-8fbf-1fbef48853c2",
+    "name": "FPS",
+    "slug": "fps",
+    "icon": "",
+    "active": true,
+    "sortOrder": 2,
+    "createdAt": "2026-06-29T01:02:23.751Z",
+    "updatedAt": "2026-06-29T01:02:23.751Z"
+  }
+]

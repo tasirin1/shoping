@@ -1,5 +1,5 @@
 import { cookies } from "next/headers"
-import { prisma } from "./prisma"
+import { db } from "./database"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
 
@@ -13,24 +13,22 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash)
 }
 
-export function generateSessionToken(): string {
+function generateSessionToken(): string {
   return crypto.randomBytes(64).toString("hex")
 }
 
 export async function createSession(userId: string): Promise<string> {
   const token = generateSessionToken()
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  await prisma.session.create({
-    data: { token, userId, expiresAt },
-  })
+  await db.create("sessions", { token, userId, expiresAt })
 
   const cookieStore = await cookies()
   cookieStore.set("session_token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    expires: expiresAt,
+    expires: new Date(expiresAt),
     path: "/",
   })
 
@@ -42,19 +40,16 @@ export async function getSession() {
   const token = cookieStore.get("session_token")?.value
   if (!token) return null
 
-  const session = await prisma.session.findUnique({
-    where: { token },
-    include: { user: true },
-  })
-
-  if (!session || session.expiresAt < new Date()) {
-    if (session) {
-      await prisma.session.delete({ where: { id: session.id } })
-    }
+  const session = await db.findOne("sessions", "token", token)
+  if (!session || new Date(session.expiresAt) < new Date()) {
+    if (session) await db.delete("sessions", session.id)
     return null
   }
 
-  return session
+  const user = await db.getById("users", session.userId)
+  if (!user) return null
+
+  return { ...session, user }
 }
 
 export async function getCurrentUser() {
@@ -67,7 +62,8 @@ export async function destroySession() {
   const token = cookieStore.get("session_token")?.value
 
   if (token) {
-    await prisma.session.deleteMany({ where: { token } })
+    const session = await db.findOne("sessions", "token", token)
+    if (session) await db.delete("sessions", session.id)
   }
 
   cookieStore.delete("session_token")

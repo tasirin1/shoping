@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
 
 export async function GET() {
   try {
     const user = await getCurrentUser()
     if (!user || user.role !== "ADMIN") return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
-    const data = await prisma.category.findMany({ include: { _count: { select: { games: true } } }, orderBy: { sortOrder: "asc" } })
-    return NextResponse.json({ success: true, data })
+    const categories = await db.getAll("categories")
+    const games = await db.getAll("games")
+    const enriched = categories.map((c: any) => ({ ...c, _count: { games: games.filter((g: any) => g.categoryId === c.id).length } }))
+    return NextResponse.json({ success: true, data: enriched })
   } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
 }
 
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
     const user = await getCurrentUser()
     if (!user || user.role !== "ADMIN") return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     const body = await request.json()
-    const data = await prisma.category.create({ data: body })
+    const data = await db.create("categories", body)
     return NextResponse.json({ success: true, message: "Kategori ditambahkan", data }, { status: 201 })
   } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
 }

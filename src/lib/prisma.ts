@@ -1,9 +1,4 @@
-import { PrismaClient } from "@prisma/client"
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+// Database Service — JSON-based local database
+// This file exists for backward compatibility.
+// All database operations use DatabaseService from "./database"
+export { db } from "./database"
