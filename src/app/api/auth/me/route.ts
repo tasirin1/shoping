@@ -6,10 +6,7 @@ export async function GET() {
     const user = await getCurrentUser()
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: "Not authenticated" },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 })
     }
 
     return NextResponse.json({
@@ -26,9 +23,6 @@ export async function GET() {
       },
     })
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Terjadi kesalahan" },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: "Terjadi kesalahan" }, { status: 500 })
   }
 }

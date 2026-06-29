@@ -1,162 +1,100 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card } from "@/components/ui/Card"
+import { DataTable, FormField } from "@/components/ui/DataTable"
+import { Modal } from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { Skeleton, TableSkeleton } from "@/components/ui/Skeleton"
-import { Package, Plus, Edit2, Trash2, Search } from "lucide-react"
-import type { GameType } from "@/types"
+import { useToast } from "@/components/ui/Toast"
+import { Badge } from "@/components/ui/Badge"
 
-interface GameWithCount extends GameType {
+interface Game {
+  id: string; name: string; slug: string; category: string | null
+  popular: boolean; active: boolean; icon: string | null; description: string | null
   _count?: { orders: number; nominals: number }
 }
 
 export default function AdminGamesPage() {
-  const [games, setGames] = useState<GameWithCount[]>([])
+  const [data, setData] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
-  const [showModal, setShowModal] = useState(false)
-  const [editing, setEditing] = useState<GameWithCount | null>(null)
-  const [form, setForm] = useState({ name: "", slug: "", description: "", category: "", popular: false, icon: "" })
   const [search, setSearch] = useState("")
+  const [modal, setModal] = useState(false)
+  const [editing, setEditing] = useState<Game | null>(null)
+  const [form, setForm] = useState({ name: "", slug: "", description: "", category: "", icon: "", popular: false, active: true })
+  const { toast } = useToast()
 
-  const fetchGames = async () => {
+  const loadData = async () => {
     try {
       const res = await fetch("/api/admin/games")
-      const data = await res.json()
-      if (data.success) setGames(data.data || [])
-    } catch {
-      console.error("Failed to fetch")
-    } finally {
-      setLoading(false)
-    }
+      const d = await res.json()
+      if (d.success) setData(d.data || [])
+    } catch {} finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchGames() }, [])
+  useEffect(() => { loadData() }, [])
 
-  const openCreate = () => {
-    setEditing(null)
-    setForm({ name: "", slug: "", description: "", category: "", popular: false, icon: "" })
-    setShowModal(true)
-  }
+  const openAdd = () => { setEditing(null); setForm({ name: "", slug: "", description: "", category: "", icon: "", popular: false, active: true }); setModal(true) }
+  const openEdit = (g: Game) => { setEditing(g); setForm({ name: g.name, slug: g.slug, description: g.description || "", category: g.category || "", icon: g.icon || "", popular: g.popular, active: g.active }); setModal(true) }
 
-  const openEdit = (game: GameWithCount) => {
-    setEditing(game)
-    setForm({ name: game.name, slug: game.slug, description: game.description || "", category: game.category || "", popular: game.popular, icon: game.icon || "" })
-    setShowModal(true)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const save = async () => {
     const url = editing ? `/api/admin/games/${editing.id}` : "/api/admin/games"
     const method = editing ? "PUT" : "POST"
     try {
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) })
-      if (res.ok) {
-        setShowModal(false)
-        fetchGames()
-      }
-    } catch {
-      // ignore
-    }
+      const d = await res.json()
+      if (d.success) { toast("success", editing ? "Game diupdate" : "Game ditambahkan"); setModal(false); loadData() }
+      else toast("error", d.error || "Gagal")
+    } catch { toast("error", "Gagal menyimpan") }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Hapus game ini?")) return
+  const remove = async (g: Game) => {
+    if (!confirm(`Hapus ${g.name}?`)) return
     try {
-      await fetch(`/api/admin/games/${id}`, { method: "DELETE" })
-      fetchGames()
-    } catch {
-      // ignore
-    }
+      const res = await fetch(`/api/admin/games/${g.id}`, { method: "DELETE" })
+      const d = await res.json()
+      if (d.success) { toast("success", "Game dihapus"); loadData() }
+      else toast("error", d.error || "Gagal")
+    } catch { toast("error", "Gagal menghapus") }
   }
 
-  const filtered = games.filter(g =>
-    g.name.toLowerCase().includes(search.toLowerCase()) ||
-    g.slug.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = data.filter(g => g.name.toLowerCase().includes(search.toLowerCase()) || g.slug.includes(search))
 
-  if (loading) return <div className="p-6"><Skeleton className="h-8 w-48 mb-6" /><TableSkeleton /></div>
+  const columns = [
+    { key: "name", label: "Nama", render: (v: string, r: Game) => <div><p className="font-medium text-gray-900 dark:text-gray-100">{v}</p><p className="text-xs text-gray-400">{r.slug}</p></div> },
+    { key: "category", label: "Kategori", className: "hidden md:table-cell" },
+    { key: "popular", label: "Populer", className: "hidden sm:table-cell", render: (v: boolean) => v ? <Badge variant="success">Ya</Badge> : "-" },
+    { key: "active", label: "Status", render: (v: boolean) => v ? <Badge variant="success">Aktif</Badge> : <Badge variant="danger">Nonaktif</Badge> },
+    { key: "_count", label: "Pesanan", className: "hidden md:table-cell", render: (_: any, r: Game) => r._count?.orders || 0 },
+  ]
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Game</h1>
-        <Button onClick={openCreate}><Plus className="w-4 h-4 mr-2" />Tambah Game</Button>
-      </div>
+      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Produk / Game</h1>
+      <DataTable columns={columns} data={filtered} loading={loading} search={search} onSearchChange={setSearch}
+        onAdd={openAdd} onEdit={openEdit} onDelete={remove} addLabel="Tambah Game" emptyMessage="Belum ada game" />
 
-      <Card className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input type="text" placeholder="Cari game..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
-        </div>
-      </Card>
-
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 dark:border-gray-800">
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Nama</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Slug</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Kategori</th>
-                <th className="text-center py-3 px-4 font-medium text-gray-500">Populer</th>
-                <th className="text-center py-3 px-4 font-medium text-gray-500">Pesanan</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((game) => (
-                <tr key={game.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30">
-                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100">{game.name}</td>
-                  <td className="py-3 px-4 text-gray-500">{game.slug}</td>
-                  <td className="py-3 px-4 text-gray-500">{game.category || "-"}</td>
-                  <td className="py-3 px-4 text-center">{game.popular ? "⭐" : "-"}</td>
-                  <td className="py-3 px-4 text-center text-gray-500">{game._count?.orders || 0}</td>
-                  <td className="py-3 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => openEdit(game)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-blue-600"><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(game.id)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-red-600"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={6} className="py-8 text-center text-gray-400">Tidak ada game</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              {editing ? "Edit Game" : "Tambah Game"}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input id="name" label="Nama Game" value={form.name} onChange={(e) => setForm({...form, name: e.target.value, slug: editing ? form.slug : e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} required />
-              <Input id="slug" label="Slug" value={form.slug} onChange={(e) => setForm({...form, slug: e.target.value})} required />
-              <Input id="category" label="Kategori" value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} />
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi</label>
-                <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} rows={3} className="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none" />
-              </div>
-              <Input id="icon" label="URL Icon" value={form.icon} onChange={(e) => setForm({...form, icon: e.target.value})} />
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={form.popular} onChange={(e) => setForm({...form, popular: e.target.checked})} className="rounded border-gray-300" />
-                <span className="text-gray-700 dark:text-gray-300">Game Populer</span>
-              </label>
-              <div className="flex gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)} fullWidth>Batal</Button>
-                <Button type="submit" fullWidth>{editing ? "Simpan" : "Tambah"}</Button>
-              </div>
-            </form>
+      <Modal open={modal} onClose={() => setModal(false)} title={editing ? "Edit Game" : "Tambah Game"} size="lg">
+        <form onSubmit={(e) => { e.preventDefault(); save() }} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input id="name" label="Nama Game" value={form.name} onChange={(e) => setForm({...form, name: e.target.value, slug: editing ? form.slug : e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} required />
+            <Input id="slug" label="Slug" value={form.slug} onChange={(e) => setForm({...form, slug: e.target.value})} required />
           </div>
-        </div>
-      )}
+          <Input id="category" label="Kategori" value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} />
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi</label>
+            <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} rows={3} className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/15" />
+          </div>
+          <Input id="icon" label="URL Icon" value={form.icon} onChange={(e) => setForm({...form, icon: e.target.value})} />
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.popular} onChange={(e) => setForm({...form, popular: e.target.checked})} className="rounded border-gray-300" /> Populer</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.active} onChange={(e) => setForm({...form, active: e.target.checked})} className="rounded border-gray-300" /> Aktif</label>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={() => setModal(false)} fullWidth>Batal</Button>
+            <Button type="submit" fullWidth>{editing ? "Simpan" : "Tambah"}</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }

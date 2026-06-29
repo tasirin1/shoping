@@ -6,9 +6,6 @@ export async function POST() {
     await destroySession()
     return NextResponse.json({ success: true, message: "Logout berhasil" })
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Terjadi kesalahan" },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: "Terjadi kesalahan" }, { status: 500 })
   }
 }

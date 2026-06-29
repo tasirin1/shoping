@@ -25,6 +25,13 @@ export async function POST(request: Request) {
       )
     }
 
+    if (user.suspended) {
+      return NextResponse.json(
+        { success: false, error: "Akun telah dinonaktifkan" },
+        { status: 403 }
+      )
+    }
+
     const isValid = await verifyPassword(password, user.password)
     if (!isValid) {
       return NextResponse.json(
@@ -35,7 +42,7 @@ export async function POST(request: Request) {
 
     await createSession(user.id)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Login berhasil",
       data: {
@@ -46,6 +53,8 @@ export async function POST(request: Request) {
         role: user.role,
       },
     })
+
+    return response
   } catch (error) {
     console.error("Login error:", error)
     return NextResponse.json(

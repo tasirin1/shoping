@@ -1,85 +1,80 @@
 "use client"
-
 import { useEffect, useState } from "react"
-import { Card } from "@/components/ui/Card"
+import { DataTable } from "@/components/ui/DataTable"
+import { Modal } from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
-import { Skeleton, TableSkeleton } from "@/components/ui/Skeleton"
+import { Input } from "@/components/ui/Input"
+import { useToast } from "@/components/ui/Toast"
+import { Badge } from "@/components/ui/Badge"
 import { formatDate } from "@/lib/utils"
-import { Users, Search, Shield, User, ChevronLeft, ChevronRight } from "lucide-react"
 
-export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [search, setSearch] = useState("")
-
-  const fetchData = async () => {
-    setLoading(true)
+export default function UsersPage() {
+  const [data, setData] = useState<any[]>([]); const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState(""); const [modal, setModal] = useState(false); const [editing, setEditing] = useState<any>(null)
+  const [form, setForm] = useState({ name: "", email: "", role: "USER", phone: "", suspended: false })
+  const { toast } = useToast()
+  const loadData = async () => {
     try {
-      const params = new URLSearchParams({ page: page.toString(), limit: "15" })
-      if (search) params.set("search", search)
-      const res = await fetch(`/api/users?${params}`)
-      const data = await res.json()
-      if (data.success) { setUsers(data.data || []); setTotalPages(data.pagination?.totalPages || 1) }
+      const p = new URLSearchParams()
+      if (search) p.set("search", search)
+      const r = await fetch(`/api/users?${p}`); const d = await r.json()
+      if (d.success) setData(d.data || [])
     } catch {} finally { setLoading(false) }
   }
+  useEffect(() => { loadData() }, [search])
 
-  useEffect(() => { fetchData() }, [page, search])
+  const openEdit = (u: any) => { setEditing(u); setForm({ name: u.name || "", email: u.email, role: u.role, phone: u.phone || "", suspended: u.suspended }); setModal(true) }
+  
+  const save = async () => {
+    if (!editing) return
+    try {
+      const res = await fetch(`/api/admin/users/${editing.id}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+      const d = await res.json()
+      if (d.success) { toast("success", "User diupdate"); setModal(false); loadData() }
+      else toast("error", d.error || "Gagal")
+    } catch { toast("error", "Gagal") }
+  }
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">User</h1>
-      </div>
+  const toggleSuspend = async (u: any) => {
+    try {
+      const res = await fetch(`/api/admin/users/${u.id}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ suspended: !u.suspended }),
+      })
+      if (res.ok) { toast("success", u.suspended ? "User diaktifkan" : "User dinonaktifkan"); loadData() }
+    } catch {}
+  }
 
-      <Card className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input type="text" placeholder="Cari user..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+  return (<div>
+    <h1 className="text-xl font-bold mb-4">User</h1>
+    <DataTable columns={[
+      { key: "username", label: "Username" },
+      { key: "email", label: "Email", className: "hidden md:table-cell" },
+      { key: "name", label: "Nama", className: "hidden sm:table-cell" },
+      { key: "role", label: "Role", render: (v: string) => v === "ADMIN" ? <Badge variant="info">Admin</Badge> : <Badge>User</Badge> },
+      { key: "suspended", label: "Status", render: (v: boolean) => v ? <Badge variant="danger">Suspend</Badge> : <Badge variant="success">Aktif</Badge> },
+    ]} data={data} loading={loading} search={search} onSearchChange={setSearch} onEdit={openEdit} emptyMessage="Tidak ada user" />
+    
+    <Modal open={modal} onClose={() => setModal(false)} title="Edit User" size="lg">
+      <form onSubmit={(e) => { e.preventDefault(); save() }} className="space-y-4">
+        <Input label="Nama" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} />
+        <Input label="Email" value={form.email} disabled />
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+          <select value={form.role} onChange={(e) => setForm({...form, role: e.target.value})} className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm">
+            <option value="USER">User</option><option value="ADMIN">Admin</option>
+          </select>
         </div>
-      </Card>
-
-      {loading ? <TableSkeleton /> : (
-        <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Username</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Email</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Nama</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-500">Role</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-500">Pesanan</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Bergabung</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u: any) => (
-                  <tr key={u.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30">
-                    <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100">{u.username}</td>
-                    <td className="py-3 px-4 text-gray-500">{u.email}</td>
-                    <td className="py-3 px-4 text-gray-500">{u.name || "-"}</td>
-                    <td className="py-3 px-4 text-center">
-                      {u.role === "ADMIN" ? <Shield className="w-4 h-4 text-primary-600 mx-auto" /> : <User className="w-4 h-4 text-gray-400 mx-auto" />}
-                    </td>
-                    <td className="py-3 px-4 text-center text-gray-500">{u._count?.orders || 0}</td>
-                    <td className="py-3 px-4 text-gray-500 text-xs">{formatDate(u.createdAt)}</td>
-                  </tr>
-                ))}
-                {users.length === 0 && <tr><td colSpan={6} className="py-8 text-center text-gray-400">Tidak ada user</td></tr>}
-              </tbody>
-            </table>
-          </div>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 p-4 border-t border-gray-100 dark:border-gray-800">
-              <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}><ChevronLeft className="w-4 h-4" /></Button>
-              <span className="text-sm text-gray-500">{page}/{totalPages}</span>
-              <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}><ChevronRight className="w-4 h-4" /></Button>
-            </div>
-          )}
-        </Card>
-      )}
-    </div>
-  )
+        <Input label="No. Telepon" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} />
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.suspended} onChange={(e) => setForm({...form, suspended: e.target.checked})} className="rounded border-gray-300" /> Suspended</label>
+        <div className="flex gap-3 pt-2">
+          <Button type="button" variant="outline" onClick={() => setModal(false)} fullWidth>Batal</Button>
+          <Button type="submit" fullWidth>Simpan</Button>
+        </div>
+      </form>
+    </Modal>
+  </div>)
 }

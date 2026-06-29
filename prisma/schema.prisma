@@ -16,6 +16,7 @@ model User {
   role      String   @default("USER")
   avatar    String?
   phone     String?
+  suspended Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -23,6 +24,19 @@ model User {
   auditLogs AuditLog[]
   carts     Cart[]
   sessions  Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
 }
 
 model Game {
@@ -33,24 +47,63 @@ model Game {
   icon        String?
   banner      String?
   thumbnail   String?
+  categoryId  String?
   category    String?
   popular     Boolean  @default(false)
   active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  providerId  String?
+  promoLabel  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  nominals Nominal[]
-  orders   Order[]
-  carts    Cart[]
+  categoryRel Category? @relation(fields: [categoryId], references: [id])
+  provider    Provider? @relation(fields: [providerId], references: [id])
+  nominals    Nominal[]
+  orders      Order[]
+  carts       Cart[]
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  icon      String?
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  games Game[]
+}
+
+model Provider {
+  id          String   @id @default(cuid())
+  name        String
+  baseUrl     String?
+  apiKey      String?
+  apiSecret   String?
+  merchantId  String?
+  signature   String?
+  active      Boolean  @default(true)
+  sandbox     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  games Game[]
 }
 
 model Nominal {
   id            String   @id @default(cuid())
   gameId        String
+  productCode   String?
   name          String
   amount        Int
   price         Float
   originalPrice Float?
+  costPrice     Float?
+  profit        Float?
+  stock         Int      @default(-1)
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -65,7 +118,10 @@ model PaymentMethod {
   name      String
   type      String
   icon      String?
+  accountNumber String?
+  accountName   String?
   active    Boolean  @default(true)
+  sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -119,6 +175,7 @@ model Order {
   paymentProof    String?
   promoCode       String?
   discountAmount  Float    @default(0)
+  note            String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   paidAt          DateTime?
@@ -179,15 +236,21 @@ model FAQ {
   updatedAt DateTime @updatedAt
 }
 
-model Session {
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+model ApiLog {
   id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
+  method    String
+  path      String
+  status    Int
+  userId    String?
+  ip        String?
+  duration  Int?
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([token])
-  @@index([userId])
+  @@index([createdAt])
 }
