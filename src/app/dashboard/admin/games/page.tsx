@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/Toast"
 import { Badge } from "@/components/ui/Badge"
 
 interface Game {
-  id: string; name: string; slug: string; category: string | null
+  id: string; name: string; slug: string; categoryName: string | null
   popular: boolean; active: boolean; icon: string | null; description: string | null
   _count?: { orders: number; nominals: number }
 }
@@ -20,7 +20,7 @@ export default function AdminGamesPage() {
   const [search, setSearch] = useState("")
   const [modal, setModal] = useState(false)
   const [editing, setEditing] = useState<Game | null>(null)
-  const [form, setForm] = useState({ name: "", slug: "", description: "", category: "", icon: "", popular: false, active: true })
+  const [form, setForm] = useState({ name: "", slug: "", description: "", categoryName: "", icon: "", popular: false, active: true })
   const { toast } = useToast()
 
   const loadData = async () => {
@@ -31,10 +31,10 @@ export default function AdminGamesPage() {
     } catch {} finally { setLoading(false) }
   }
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadData() }, [loadData])
 
-  const openAdd = () => { setEditing(null); setForm({ name: "", slug: "", description: "", category: "", icon: "", popular: false, active: true }); setModal(true) }
-  const openEdit = (g: Game) => { setEditing(g); setForm({ name: g.name, slug: g.slug, description: g.description || "", category: g.category || "", icon: g.icon || "", popular: g.popular, active: g.active }); setModal(true) }
+  const openAdd = () => { setEditing(null); setForm({ name: "", slug: "", description: "", categoryName: "", icon: "", popular: false, active: true }); setModal(true) }
+  const openEdit = (g: Game) => { setEditing(g); setForm({ name: g.name, slug: g.slug, description: g.description || "", categoryName: g.categoryName || "", icon: g.icon || "", popular: g.popular, active: g.active }); setModal(true) }
 
   const save = async () => {
     const url = editing ? `/api/admin/games/${editing.id}` : "/api/admin/games"
@@ -79,7 +79,7 @@ export default function AdminGamesPage() {
             <Input id="name" label="Nama Game" value={form.name} onChange={(e) => setForm({...form, name: e.target.value, slug: editing ? form.slug : e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} required />
             <Input id="slug" label="Slug" value={form.slug} onChange={(e) => setForm({...form, slug: e.target.value})} required />
           </div>
-          <Input id="category" label="Kategori" value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} />
+          <Input id="categoryName" label="Kategori" value={form.categoryName} onChange={(e) => setForm({...form, categoryName: e.target.value})} />
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi</label>
             <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} rows={3} className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/15" />

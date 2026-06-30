@@ -19,7 +19,7 @@ export default function OrdersPage() {
       if (d.success) { setData(d.data || []); setTotalPages(d.pagination?.totalPages || 1) }
     } catch {} finally { setLoading(false) }
   }
-  useEffect(() => { loadData() }, [page, statusFilter])
+  useEffect(() => { loadData() }, [loadData])
 
   const statuses = ["", "PENDING", "SUCCESS", "FAILED", "EXPIRED"]
 

@@ -6,10 +6,9 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard, Package, Gamepad2, Tags, ShoppingBag,
-  Users, Image, Ticket, Wallet, Settings, Shield, LogOut,
-  Menu, X, PanelLeftClose, ChevronDown, Zap, FileText
+  Users, Image, Ticket, Wallet, Settings, 
+  Menu, PanelLeftClose, Zap, FileText
 } from "lucide-react"
-import { Button } from "@/components/ui/Button"
 
 const menuGroups = [
   {
@@ -59,18 +58,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
     const check = async () => {
       try {
         const res = await fetch("/api/auth/me")
-        if (!res.ok) { router.push("/login"); return }
+        if (!res.ok) { router.push("/login?redirect=/dashboard/admin"); return }
         const d = await res.json()
-        if (!d.success || d.data.role !== "ADMIN") { router.push("/login"); return }
-      } catch { router.push("/login") }
+        if (!d.success || d.data.role !== "ADMIN") { router.push("/dashboard"); return }
+      } catch { router.push("/login?redirect=/dashboard/admin") }
     }
     check()
   }, [router])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setSidebarOpen(false) }, [pathname])
 
   if (!mounted) return null

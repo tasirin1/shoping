@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Card } from "@/components/ui/Card"
 import { ShoppingBag, Mail, Lock, Eye, EyeOff } from "lucide-react"
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirect")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPw, setShowPw] = useState(false)
@@ -28,7 +30,9 @@ export default function LoginPage() {
       })
       const d = await res.json()
       if (!res.ok) { setError(d.error || "Login gagal"); return }
-      router.push("/")
+      // Redirect based on role or redirect param
+      const target = redirectTo || (d.data?.role === "ADMIN" ? "/dashboard/admin" : "/dashboard")
+      router.push(target)
       router.refresh()
     } catch { setError("Terjadi kesalahan. Coba lagi.") } finally { setLoading(false) }
   }
@@ -66,5 +70,17 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center px-4 pt-16 pb-10">
+        <div className="skeleton-pulse h-96 w-full max-w-sm rounded-2xl" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }

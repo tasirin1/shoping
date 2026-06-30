@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { useToast } from "@/components/ui/Toast"
-import { Save, Globe, Palette, MessageCircle, Phone, Mail, Search, Smartphone } from "lucide-react"
+import { Save, Globe, Palette, Phone, Search } from "lucide-react"
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
@@ -14,6 +14,7 @@ export default function SettingsPage() {
   const { toast } = useToast()
 
   useEffect(() => {
+     
     const loadData = async () => {
       try {
         const r = await fetch("/api/admin/settings")

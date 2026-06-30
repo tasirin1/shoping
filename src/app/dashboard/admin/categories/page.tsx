@@ -12,7 +12,7 @@ export default function CategoriesPage() {
   const [form, setForm] = useState({ name: "", slug: "", icon: "", active: true, sortOrder: "0" })
   const { toast } = useToast()
   const loadData = async () => { try { const r = await fetch("/api/admin/categories"); const d = await r.json(); if (d.success) setData(d.data || []) } catch {} finally { setLoading(false) } }
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadData() }, [loadData])
   const openAdd = () => { setEditing(null); setForm({ name: "", slug: "", icon: "", active: true, sortOrder: "0" }); setModal(true) }
   const openEdit = (c: any) => { setEditing(c); setForm({ name: c.name, slug: c.slug, icon: c.icon || "", active: c.active, sortOrder: c.sortOrder.toString() }); setModal(true) }
   const save = async () => {

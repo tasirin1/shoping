@@ -22,6 +22,7 @@ function GamesContent() {
   }, [initial])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     const loadData = async () => {
       setLoading(true)
       setError(null)

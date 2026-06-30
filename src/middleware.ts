@@ -16,7 +16,7 @@ const publicPaths = [
   "/api/check-nickname",
 ]
 
-const adminPaths = ["/dashboard/admin"]
+// Admin paths are protected within the route check
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -59,12 +59,20 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Admin routes
+  // Admin routes - require ADMIN role
   if (pathname.startsWith("/dashboard/admin") || pathname.startsWith("/api/admin")) {
     if (!sessionToken) {
       const loginUrl = new URL("/login", request.url)
       loginUrl.searchParams.set("redirect", pathname)
       return NextResponse.redirect(loginUrl)
+    }
+    // Check role cookie for admin routes
+    const userRole = request.cookies.get("user_role")?.value
+    if (userRole !== "ADMIN") {
+      if (pathname.startsWith("/api")) {
+        return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+      }
+      return NextResponse.redirect(new URL("/dashboard", request.url))
     }
   }
 

@@ -13,7 +13,7 @@ export default function LogsPage() {
       if (d.success) { setData(d.data || []); setTotalPages(d.pagination?.totalPages || 1) }
     } catch {} finally { setLoading(false) }
   }
-  useEffect(() => { loadData() }, [page])
+  useEffect(() => { loadData() }, [loadData])
 
   return (<div>
     <h1 className="text-xl font-bold mb-4">Log Aktivitas</h1>

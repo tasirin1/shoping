@@ -13,7 +13,7 @@ export default function PaymentsPage() {
   const [form, setForm] = useState({ name: "", type: "", accountNumber: "", accountName: "", active: true, sortOrder: "0" })
   const { toast } = useToast()
   const loadData = async () => { try { const r = await fetch("/api/admin/payments"); const d = await r.json(); if (d.success) setData(d.data || []) } catch {} finally { setLoading(false) } }
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadData() }, [loadData])
   const openAdd = () => { setEditing(null); setForm({ name: "", type: "", accountNumber: "", accountName: "", active: true, sortOrder: "0" }); setModal(true) }
   const openEdit = (p: any) => { setEditing(p); setForm({ name: p.name, type: p.type, accountNumber: p.accountNumber || "", accountName: p.accountName || "", active: p.active, sortOrder: p.sortOrder.toString() }); setModal(true) }
   const save = async () => {

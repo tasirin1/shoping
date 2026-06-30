@@ -21,7 +21,7 @@ export default function UsersPage() {
       if (d.success) setData(d.data || [])
     } catch {} finally { setLoading(false) }
   }
-  useEffect(() => { loadData() }, [search])
+  useEffect(() => { loadData() }, [loadData])
 
   const openEdit = (u: any) => { setEditing(u); setForm({ name: u.name || "", email: u.email, role: u.role, phone: u.phone || "", suspended: u.suspended }); setModal(true) }
   
@@ -36,16 +36,6 @@ export default function UsersPage() {
       if (d.success) { toast("success", "User diupdate"); setModal(false); loadData() }
       else toast("error", d.error || "Gagal")
     } catch { toast("error", "Gagal") }
-  }
-
-  const toggleSuspend = async (u: any) => {
-    try {
-      const res = await fetch(`/api/admin/users/${u.id}`, {
-        method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ suspended: !u.suspended }),
-      })
-      if (res.ok) { toast("success", u.suspended ? "User diaktifkan" : "User dinonaktifkan"); loadData() }
-    } catch {}
   }
 
   return (<div>

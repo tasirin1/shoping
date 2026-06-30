@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
-import bcrypt from "bcryptjs"
 
 export async function GET() {
   try {

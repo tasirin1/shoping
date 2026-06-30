@@ -54,7 +54,7 @@ export function GameCard({ game, index = 0 }: GameCardProps) {
             {game.name}
           </h3>
           <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
-            {game.category || "Top Up Game"}
+            {game.categoryName || "Top Up Game"}
           </p>
 
           {/* Price */}

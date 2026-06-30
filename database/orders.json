@@ -1,0 +1,23 @@
+[
+  {
+    "id": "0f9f75b4-7b9c-4d43-a2ec-34f449b8682f",
+    "invoice": "INV/20260629/VI87IL",
+    "userId": "9768a25d-47a2-4cc1-91ad-74e446f484f9",
+    "gameId": "4d6c2b58-da29-4bf3-86dc-62dca1b1afd6",
+    "nominalId": "bc5fb923-9286-43de-a855-f235baeb82aa",
+    "paymentMethodId": null,
+    "playerId": "123456789",
+    "amount": 19000,
+    "fee": 190,
+    "total": 19190,
+    "status": "SUCCESS",
+    "playerNickname": null,
+    "paymentProof": null,
+    "promoCode": null,
+    "discountAmount": 0,
+    "note": null,
+    "createdAt": "2026-06-29T04:22:12.420Z",
+    "updatedAt": "2026-06-29T04:22:14.818Z",
+    "paidAt": "2026-06-29T04:22:14.817Z"
+  }
+]

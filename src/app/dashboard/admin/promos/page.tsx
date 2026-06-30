@@ -14,7 +14,7 @@ export default function PromosPage() {
   const [form, setForm] = useState({ code: "", name: "", description: "", discount: "", discountType: "PERCENTAGE", minPurchase: "", maxDiscount: "", maxUses: "", active: true })
   const { toast } = useToast()
   const loadData = async () => { try { const r = await fetch("/api/admin/promos"); const d = await r.json(); if (d.success) setData(d.data || []) } catch {} finally { setLoading(false) } }
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadData() }, [loadData])
   const openAdd = () => { setEditing(null); setForm({ code: "", name: "", description: "", discount: "", discountType: "PERCENTAGE", minPurchase: "", maxDiscount: "", maxUses: "", active: true }); setModal(true) }
   const openEdit = (p: any) => { setEditing(p); setForm({ code: p.code, name: p.name, description: p.description || "", discount: p.discount.toString(), discountType: p.discountType, minPurchase: p.minPurchase?.toString() || "", maxDiscount: p.maxDiscount?.toString() || "", maxUses: p.maxUses?.toString() || "", active: p.active }); setModal(true) }
   const save = async () => {

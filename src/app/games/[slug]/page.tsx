@@ -8,7 +8,7 @@ import { DetailSkeleton } from "@/components/ui/Skeleton"
 import { formatCurrency, cn } from "@/lib/utils"
 import {
   ChevronLeft, Check, User, Wallet, ShoppingCart,
-  AlertCircle, Loader2, Gamepad2, Search
+  AlertCircle, Gamepad2
 } from "lucide-react"
 import type { GameType, NominalType, PaymentMethodType } from "@/types"
 
@@ -30,6 +30,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ slug: str
   const [ordering, setOrdering] = useState(false)
 
   useEffect(() => {
+     
     const loadData = async () => {
       try {
         const [gRes, pRes] = await Promise.all([

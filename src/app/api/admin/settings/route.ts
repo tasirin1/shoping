@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
+import { createAuditLog } from "@/lib/audit"
 
 export async function GET() {
   try {
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
       if (existing) await db.update("settings", existing.id, { value: String(value) })
       else await db.create("settings", { key, value: String(value) })
     }
+    await createAuditLog("UPDATE", "settings", null, "Mengupdate pengaturan website")
     return NextResponse.json({ success: true, message: "Pengaturan disimpan" })
   } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
 }

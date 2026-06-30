@@ -5,11 +5,11 @@ import crypto from "crypto"
 
 const SALT_ROUNDS = 12
 
-export async function hashPassword(password: string): Promise<string> {
+export function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, SALT_ROUNDS)
 }
 
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+export function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash)
 }
 
@@ -21,11 +21,24 @@ export async function createSession(userId: string): Promise<string> {
   const token = generateSessionToken()
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
+  // Get user role for the cookie
+  const user = await db.getById("users", userId)
+  const role = user?.role || "USER"
+
   await db.create("sessions", { token, userId, expiresAt })
 
   const cookieStore = await cookies()
   cookieStore.set("session_token", token, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    expires: new Date(expiresAt),
+    path: "/",
+  })
+
+  // Set role cookie for middleware to read
+  cookieStore.set("user_role", role, {
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     expires: new Date(expiresAt),
@@ -67,6 +80,7 @@ export async function destroySession() {
   }
 
   cookieStore.delete("session_token")
+  cookieStore.delete("user_role")
 }
 
 export async function requireAuth() {

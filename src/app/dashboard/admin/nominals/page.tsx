@@ -16,7 +16,7 @@ export default function NominalsPage() {
   const loadData = async () => {
     try { const [r1, r2] = await Promise.all([fetch("/api/admin/nominals"), fetch("/api/admin/games")]); const d1 = await r1.json(); const d2 = await r2.json(); if (d1.success) setData(d1.data || []); if (d2.success) setGames(d2.data || []) } catch {} finally { setLoading(false) }
   }
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadData() }, [loadData])
   const openAdd = () => { setEditing(null); setForm({ gameId: "", name: "", amount: "", price: "", originalPrice: "", costPrice: "", stock: "-1", active: true }); setModal(true) }
   const openEdit = (n: any) => { setEditing(n); setForm({ gameId: n.gameId, name: n.name, amount: n.amount.toString(), price: n.price.toString(), originalPrice: n.originalPrice?.toString() || "", costPrice: n.costPrice?.toString() || "", stock: n.stock?.toString() || "-1", active: n.active }); setModal(true) }
   const save = async () => {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
+import { createAuditLog } from "@/lib/audit"
 
 export async function GET() {
   try {

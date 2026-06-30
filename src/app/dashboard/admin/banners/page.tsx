@@ -13,7 +13,7 @@ export default function BannersPage() {
   const [form, setForm] = useState({ title: "", subtitle: "", image: "", link: "", position: "0", active: true })
   const { toast } = useToast()
   const loadData = async () => { try { const r = await fetch("/api/admin/banners"); const d = await r.json(); if (d.success) setData(d.data || []) } catch {} finally { setLoading(false) } }
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadData() }, [loadData])
   const openAdd = () => { setEditing(null); setForm({ title: "", subtitle: "", image: "", link: "", position: "0", active: true }); setModal(true) }
   const openEdit = (b: any) => { setEditing(b); setForm({ title: b.title, subtitle: b.subtitle || "", image: b.image || "", link: b.link || "", position: b.position.toString(), active: b.active }); setModal(true) }
   const save = async () => {

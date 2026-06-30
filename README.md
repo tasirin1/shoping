@@ -1,6 +1,6 @@
 # Shoping - Top Up Game Website
 
-Platform top up game modern, elegan, dan cepat. Dibangun dengan Next.js, TypeScript, Tailwind CSS, Prisma, dan PostgreSQL.
+Platform top up game modern, elegan, dan cepat. Dibangun dengan Next.js 16, TypeScript, dan Tailwind CSS.
 
 ## Fitur
 
@@ -16,15 +16,13 @@ Platform top up game modern, elegan, dan cepat. Dibangun dengan Next.js, TypeScr
 ## Teknologi
 
 - **Frontend**: Next.js 16 (App Router), TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL
+- **Backend**: Next.js API Routes, JSON Database
 - **Auth**: Session-based dengan bcryptjs
-- **Deployment**: Docker, Docker Compose
+- **Deployment**: Docker, Koyeb
 
 ## Persyaratan
 
 - Node.js 20+
-- PostgreSQL 16+
 - Docker & Docker Compose (opsional)
 
 ## Instalasi
@@ -41,23 +39,10 @@ npm install
 
 ```bash
 cp .env.example .env
-# Edit .env sesuai konfigurasi database kamu
+# Edit SESSION_SECRET dengan string acak yang aman
 ```
 
-### 3. Setup Database
-
-```bash
-# Jalankan PostgreSQL (atau gunakan Docker)
-docker compose up -d db
-
-# Migrasi database
-npx prisma migrate dev --name init
-
-# Seed data awal
-npx prisma db seed
-```
-
-### 4. Jalankan Development
+### 3. Jalankan Development
 
 ```bash
 npm run dev
@@ -65,7 +50,7 @@ npm run dev
 
 Buka [http://localhost:3000](http://localhost:3000)
 
-### 5. Build Production
+### 4. Build Production
 
 ```bash
 npm run build
@@ -80,84 +65,47 @@ docker compose up -d --build
 
 Aplikasi akan berjalan di [http://localhost:3000](http://localhost:3000)
 
-## Akun Default (Seed)
+## Deployment ke Koyeb
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@shoping.com | admin123 |
-| User | user@demo.com | user123 |
+1. Push repository ke GitHub
+2. Set environment variables di Koyeb:
+   - `NEXT_PUBLIC_APP_URL`: URL aplikasi Koyeb
+   - `SESSION_SECRET`: String acak yang aman
+3. Deploy dari GitHub via Koyeb dashboard
+4. Set `Build Command`:
+   ```
+   npm ci && npm run build
+   ```
+5. Set `Run Command`:
+   ```
+   npm start
+   ```
 
-## Struktur Proyek
+## Login Default
 
-```
-shoping/
-├── prisma/                  # Prisma schema & seed
-├── public/                  # Static assets
-├── src/
-│   ├── app/                 # Next.js App Router pages & API
-│   │   ├── (auth)/          # Login & Register
-│   │   ├── api/             # Backend API routes
-│   │   ├── checkout/        # Checkout page
-│   │   ├── coming-soon/     # Coming soon page
-│   │   ├── dashboard/       # User & Admin dashboard
-│   │   ├── games/           # Game listing & detail
-│   │   └── orders/          # Order history
-│   ├── components/          # React components
-│   │   ├── ui/              # Reusable UI components
-│   │   ├── layout/          # Layout components
-│   │   ├── home/            # Home page sections
-│   │   ├── game/            # Game-related components
-│   │   └── dashboard/       # Dashboard components
-│   ├── lib/                 # Utility functions & config
-│   └── types/               # TypeScript type definitions
-├── Dockerfile
-├── docker-compose.yml
-└── package.json
-```
+**Admin:**
+- Email: admin@shoping.com
+- Password: admin123
 
-## API Routes
+**User:**
+- Email: demo@shoping.com
+- Password: demo123
 
-### Public
-- `GET /api/games` - Daftar game
-- `GET /api/games/[slug]` - Detail game
-- `GET /api/payment-methods` - Metode pembayaran
-- `GET /api/promos` - Promo aktif
-- `POST /api/check-nickname` - Cek nickname (mock)
+## Struktur Database
 
-### Auth
-- `POST /api/auth/register` - Registrasi
-- `POST /api/auth/login` - Login
-- `GET /api/auth/me` - Profile user
-- `POST /api/auth/logout` - Logout
+Aplikasi menggunakan file JSON sebagai database lokal yang tersimpan di folder `/database`:
 
-### Protected
-- `GET /api/orders` - Riwayat pesanan
-- `POST /api/orders` - Buat pesanan
-- `POST /api/payment/checkout` - Inisiasi pembayaran
+- `users.json` - Data user
+- `games.json` - Data game
+- `products.json` - Data nominal top up
+- `orders.json` - Data pesanan
+- `providers.json` - Data API provider
+- `payments.json` - Data metode pembayaran
+- `banners.json` - Data banner
+- `promos.json` - Data promo
+- `settings.json` - Pengaturan website
+- `logs.json` - Log aktivitas admin
+- `categories.json` - Kategori game
+- `sessions.json` - Sesi login
 
-### Admin
-- `GET /api/admin/stats` - Statistik dashboard
-- `GET/POST /api/admin/games` - CRUD game
-- `GET/POST /api/admin/nominals` - CRUD nominal
-- `GET/POST /api/admin/promos` - CRUD promo
-- `GET/POST /api/admin/banners` - CRUD banner
-- `GET /api/admin/orders` - Daftar pesanan
-- `GET /api/users` - Daftar user (admin only)
-- `GET /api/admin/audit-logs` - Log aktivitas
-
-### Webhook
-- `POST /api/webhook` - Mock webhook pembayaran
-
-## Keamanan
-
-- Password hashing dengan bcryptjs (12 salt rounds)
-- Session-based authentication dengan cookie httpOnly
-- Input sanitization (XSS protection)
-- Input validation lengkap
-- Parameterized queries via Prisma (SQL injection protection)
-- Role-based access control (USER/ADMIN)
-- Rate limiting pada API routes
-
-## Lisensi
-
-MIT
+Database Service (`src/lib/database.ts`) sudah diabstraksi sehingga mudah diganti ke Prisma/PostgreSQL tanpa mengubah logika bisnis.

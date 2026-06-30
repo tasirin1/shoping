@@ -1,4 +1,31 @@
-export interface GameType {
+// ============================================================
+// Core Data Types
+// ============================================================
+
+export interface User {
+  id: string
+  email: string
+  username: string
+  password: string
+  name: string | null
+  role: "USER" | "ADMIN"
+  avatar: string | null
+  phone: string | null
+  suspended: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Session {
+  id: string
+  token: string
+  userId: string
+  expiresAt: string
+  createdAt: string
+  user?: User
+}
+
+export interface Game {
   id: string
   slug: string
   name: string
@@ -6,57 +33,64 @@ export interface GameType {
   icon: string | null
   banner: string | null
   thumbnail: string | null
-  category: string | null
+  categoryId: string | null
+  categoryName: string | null
   popular: boolean
   active: boolean
-  nominals: NominalType[]
+  sortOrder: number
+  providerId: string | null
+  promoLabel: string | null
+  createdAt: string
+  updatedAt: string
+  nominals?: Product[]
+  categoryRel?: Category | null
 }
 
-export interface NominalType {
+export interface Product {
   id: string
   gameId: string
   name: string
   amount: number
   price: number
   originalPrice: number | null
+  costPrice: number | null
+  profit: number | null
+  stock: number
   active: boolean
+  productCode: string | null
+  createdAt: string
+  updatedAt: string
+  game?: Game | null
 }
 
-export interface PaymentMethodType {
+export interface Category {
   id: string
   name: string
-  type: string
+  slug: string
   icon: string | null
   active: boolean
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+  _count?: { games: number }
 }
 
-export interface PromoType {
+export interface Provider {
   id: string
-  code: string
   name: string
-  description: string | null
-  discount: number
-  discountType: string
-  minPurchase: number | null
-  maxDiscount: number | null
-  maxUses: number | null
-  usedCount: number
-  startDate: string | null
-  endDate: string | null
+  baseUrl: string | null
+  apiKey: string | null
+  apiSecret: string | null
+  merchantId: string | null
+  signature: string | null
   active: boolean
+  sandbox: boolean
+  createdAt: string
+  updatedAt: string
+  _count?: { games: number }
 }
 
-export interface BannerType {
-  id: string
-  title: string
-  subtitle: string | null
-  image: string | null
-  link: string | null
-  position: number
-  active: boolean
-}
-
-export interface OrderType {
+export interface Order {
   id: string
   invoice: string
   userId: string
@@ -68,30 +102,72 @@ export interface OrderType {
   amount: number
   fee: number
   total: number
-  status: string
+  status: "PENDING" | "SUCCESS" | "FAILED" | "EXPIRED"
   paymentProof: string | null
   promoCode: string | null
   discountAmount: number
+  note: string | null
   createdAt: string
   updatedAt: string
   paidAt: string | null
-  game?: GameType
-  nominal?: NominalType
-  paymentMethod?: PaymentMethodType
+  game?: Game | null
+  nominal?: Product | null
+  user?: { id: string; username: string } | null
+  paymentMethod?: PaymentMethod | null
 }
 
-export interface UserType {
+export interface PaymentMethod {
   id: string
-  email: string
-  username: string
-  name: string | null
-  role: string
-  avatar: string | null
-  phone: string | null
+  name: string
+  type: string
+  icon: string | null
+  accountNumber: string | null
+  accountName: string | null
+  active: boolean
+  sortOrder: number
   createdAt: string
+  updatedAt: string
 }
 
-export interface AuditLogType {
+export interface Promo {
+  id: string
+  code: string
+  name: string
+  description: string | null
+  discount: number
+  discountType: "PERCENTAGE" | "NOMINAL"
+  minPurchase: number | null
+  maxDiscount: number | null
+  maxUses: number | null
+  usedCount: number
+  startDate: string | null
+  endDate: string | null
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Banner {
+  id: string
+  title: string
+  subtitle: string | null
+  image: string | null
+  link: string | null
+  position: number
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SiteSetting {
+  createdAt: string
+  updatedAt: string
+  id: string
+  key: string
+  value: string
+}
+
+export interface AuditLog {
   id: string
   userId: string
   action: string
@@ -100,16 +176,7 @@ export interface AuditLogType {
   details: string | null
   ip: string | null
   createdAt: string
-  user?: { username: string; email: string }
-}
-
-export interface FAQType {
-  id: string
-  question: string
-  answer: string
-  category: string | null
-  position: number
-  active: boolean
+  user?: { username: string; email: string } | null
 }
 
 export interface DashboardStats {
@@ -118,7 +185,7 @@ export interface DashboardStats {
   totalUsers: number
   pendingOrders: number
   successOrders: number
-  recentOrders: OrderType[]
+  recentOrders: Order[]
   popularGames: { name: string; count: number; revenue: number }[]
 }
 
@@ -127,4 +194,19 @@ export interface ApiResponse<T = unknown> {
   message?: string
   data?: T
   error?: string
+  pagination?: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
 }
+
+// Re-export with old names for backward compatibility
+export type GameType = Game
+export type NominalType = Product
+export type PaymentMethodType = PaymentMethod
+export type PromoType = Promo
+export type BannerType = Banner
+export type OrderType = Order
+export type UserType = User

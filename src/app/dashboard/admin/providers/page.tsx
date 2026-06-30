@@ -13,7 +13,7 @@ export default function ProvidersPage() {
   const [form, setForm] = useState({ name: "", baseUrl: "", apiKey: "", apiSecret: "", merchantId: "", active: true, sandbox: true })
   const { toast } = useToast()
   const loadData = async () => { try { const r = await fetch("/api/admin/providers"); const d = await r.json(); if (d.success) setData(d.data || []) } catch {} finally { setLoading(false) } }
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadData() }, [loadData])
   const openAdd = () => { setEditing(null); setForm({ name: "", baseUrl: "", apiKey: "", apiSecret: "", merchantId: "", active: true, sandbox: true }); setModal(true) }
   const openEdit = (p: any) => { setEditing(p); setForm({ name: p.name, baseUrl: p.baseUrl || "", apiKey: p.apiKey || "", apiSecret: p.apiSecret || "", merchantId: p.merchantId || "", active: p.active, sandbox: p.sandbox }); setModal(true) }
   const save = async () => {

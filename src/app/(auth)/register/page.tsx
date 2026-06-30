@@ -31,7 +31,7 @@ export default function RegisterPage() {
       })
       const d = await res.json()
       if (!res.ok) { setError(d.error || "Registrasi gagal"); return }
-      router.push("/"); router.refresh()
+      router.push("/dashboard"); router.refresh()
     } catch { setError("Terjadi kesalahan") } finally { setLoading(false) }
   }
 

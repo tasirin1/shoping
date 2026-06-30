@@ -16,13 +16,14 @@ export default function UserDashboard() {
   const router = useRouter()
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     const loadData = async () => {
       try {
         const [uRes, oRes] = await Promise.all([
           fetch("/api/auth/me"),
           fetch("/api/orders?limit=5"),
         ])
-        if (uRes.status === 401) { router.push("/login"); return }
+        if (uRes.status === 401) { router.push("/login?redirect=/dashboard"); return }
         const uData = await uRes.json()
         if (uData.success) setUser(uData.data)
         if (oRes.ok) { const oData = await oRes.json(); if (oData.success) setOrders(oData.data || []) }

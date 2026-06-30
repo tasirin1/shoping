@@ -5,8 +5,8 @@ import { Card } from "@/components/ui/Card"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import {
-  ShoppingBag, Users, TrendingUp, DollarSign,
-  Clock, Package, ArrowUp, ArrowDown
+  ShoppingBag, Users,  DollarSign,
+  Clock
 } from "lucide-react"
 
 export default function AdminDashboardPage() {
@@ -14,6 +14,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+     
     const loadData = async () => {
       try {
         const res = await fetch("/api/admin/stats")

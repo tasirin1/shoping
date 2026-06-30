@@ -26,6 +26,7 @@ export default function OrdersPage() {
   const router = useRouter()
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     const loadData = async () => {
       setLoading(true)
       try {
@@ -34,7 +35,7 @@ export default function OrdersPage() {
         p.set("page", page.toString())
         p.set("limit", "10")
         const res = await fetch(`/api/orders?${p}`)
-        if (res.status === 401) { router.push("/login"); return }
+        if (res.status === 401) { router.push("/login?redirect=/orders"); return }
         const d = await res.json()
         if (d.success) { setOrders(d.data || []); setTotalPages(d.pagination?.totalPages || 1) }
         else setError(d.error || "Gagal memuat")

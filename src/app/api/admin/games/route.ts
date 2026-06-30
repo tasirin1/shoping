@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
+import { createAuditLog } from "@/lib/audit"
 
 export async function GET() {
   try {
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
     if (!user || user.role !== "ADMIN") return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     const body = await request.json()
     const data = await db.create("games", { ...body, slug: body.slug?.toLowerCase().replace(/[^a-z0-9-]/g, "-") || body.name?.toLowerCase().replace(/[^a-z0-9-]/g, "-") })
+    await createAuditLog("CREATE", "game", data.id, `Game: ${body.name}`)
     return NextResponse.json({ success: true, message: "Game ditambahkan", data }, { status: 201 })
   } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
 }

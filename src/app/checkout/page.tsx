@@ -5,10 +5,10 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Skeleton } from "@/components/ui/Skeleton"
-import { formatCurrency, getStatusLabel, getStatusColor } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 import {
-  CheckCircle, Clock, AlertCircle, ArrowLeft,
-  Copy, Loader2, ShoppingBag, BadgeCheck
+  Clock, ArrowLeft,
+  Loader2, ShoppingBag, BadgeCheck
 } from "lucide-react"
 import type { OrderType } from "@/types"
 
@@ -23,11 +23,11 @@ function CheckoutContent() {
   const [payLoading, setPayLoading] = useState(false)
   const [countdown, setCountdown] = useState(24 * 3600)
   const [status, setStatus] = useState("PENDING")
-  const [copied, setCopied] = useState(false)
+  // const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (!orderId) { setLoading(false); return }
     const fetchOrder = async () => {
+      if (!orderId) { setLoading(false); return }
       try {
         const res = await fetch("/api/orders?limit=1")
         const d = await res.json()
