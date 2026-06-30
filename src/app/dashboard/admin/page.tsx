@@ -139,7 +139,7 @@ export default function AdminDashboardPage() {
               <span className="text-xs text-gray-400">{stats.recentOrders.length} pesanan</span>
             )}
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-1 px-1">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-gray-800">

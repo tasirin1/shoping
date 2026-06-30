@@ -23,7 +23,7 @@ export default function OrdersPage() {
 
   const statuses = ["", "PENDING", "SUCCESS", "FAILED", "EXPIRED"]
 
-  return (<div>
+  return (<div className="min-w-0">
     <h1 className="text-xl font-bold mb-4">Pesanan</h1>
     <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide pb-1">
       {statuses.map((s) => (

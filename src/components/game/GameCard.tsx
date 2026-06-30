@@ -18,7 +18,7 @@ export function GameCard({ game, index = 0 }: GameCardProps) {
   return (
     <Link
       href={`/games/${game.slug}`}
-      className="group block"
+      className="group block w-full min-w-0"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       <div className="card-base card-hover overflow-hidden">
@@ -28,7 +28,7 @@ export function GameCard({ game, index = 0 }: GameCardProps) {
             <img
               src={game.icon}
               alt={game.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 max-w-full"
               loading="lazy"
             />
           ) : (

@@ -78,14 +78,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-950 overflow-x-hidden">
       <div className="flex">
         {/* Mobile overlay */}
         {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
         {/* Sidebar */}
         <aside className={cn(
-          "fixed top-16 left-0 bottom-0 z-50 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 transition-all duration-200 overflow-y-auto",
+          "fixed top-16 left-0 bottom-0 z-50 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 transition-all duration-200 overflow-y-auto max-w-[85vw]",
           collapsed ? "w-16" : "w-64",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}>
@@ -132,7 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main */}
-        <div className={cn("flex-1 transition-all duration-200", collapsed ? "lg:ml-16" : "lg:ml-64")}>
+        <div className={cn("flex-1 transition-all duration-200 min-w-0 w-full max-w-full", collapsed ? "lg:ml-16" : "lg:ml-64")}>
           {/* Mobile header */}
           <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
             <button onClick={() => setSidebarOpen(true)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">

@@ -15,7 +15,7 @@ export default function LogsPage() {
   }
   useEffect(() => { loadData() }, [loadData])
 
-  return (<div>
+  return (<div className="min-w-0">
     <h1 className="text-xl font-bold mb-4">Log Aktivitas</h1>
     <DataTable columns={[
       { key: "action", label: "Aksi", render: (v: string) => <span className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">{v}</span> },

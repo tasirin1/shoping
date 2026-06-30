@@ -92,7 +92,7 @@ export function Header() {
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16 gap-2">
+        <div className="flex items-center justify-between h-16 gap-1 sm:gap-2 w-full min-w-0">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
             <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center group-hover:scale-105 transition-transform duration-150">
@@ -126,7 +126,7 @@ export function Header() {
           </nav>
 
           {/* Right section — auth ALWAYS visible */}
-          <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Search icon */}
             <button
               onClick={() => setShowSearch(!showSearch)}

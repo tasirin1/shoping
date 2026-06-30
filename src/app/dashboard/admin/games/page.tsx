@@ -60,7 +60,7 @@ export default function AdminGamesPage() {
   const filtered = data.filter(g => g.name.toLowerCase().includes(search.toLowerCase()) || g.slug.includes(search))
 
   const columns = [
-    { key: "name", label: "Nama", render: (v: string, r: Game) => <div><p className="font-medium text-gray-900 dark:text-gray-100">{v}</p><p className="text-xs text-gray-400">{r.slug}</p></div> },
+    { key: "name", label: "Nama", render: (v: string, r: Game) => <div className="min-w-0"><p className="font-medium text-gray-900 dark:text-gray-100">{v}</p><p className="text-xs text-gray-400">{r.slug}</p></div> },
     { key: "category", label: "Kategori", className: "hidden md:table-cell" },
     { key: "popular", label: "Populer", className: "hidden sm:table-cell", render: (v: boolean) => v ? <Badge variant="success">Ya</Badge> : "-" },
     { key: "active", label: "Status", render: (v: boolean) => v ? <Badge variant="success">Aktif</Badge> : <Badge variant="danger">Nonaktif</Badge> },
@@ -68,7 +68,7 @@ export default function AdminGamesPage() {
   ]
 
   return (
-    <div>
+    <div className="min-w-0">
       <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Produk / Game</h1>
       <DataTable columns={columns} data={filtered} loading={loading} search={search} onSearchChange={setSearch}
         onAdd={openAdd} onEdit={openEdit} onDelete={remove} addLabel="Tambah Game" emptyMessage="Belum ada game" />

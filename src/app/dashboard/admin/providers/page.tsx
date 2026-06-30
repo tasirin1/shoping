@@ -22,7 +22,7 @@ export default function ProvidersPage() {
   }
   const remove = async (p: any) => { if (!confirm("Hapus provider?")) return; try { await fetch(`/api/admin/providers/${p.id}`, { method: "DELETE" }); toast("success", "Dihapus"); loadData() } catch {} }
 
-  return (<div>
+  return (<div className="min-w-0">
     <h1 className="text-xl font-bold mb-4">API Provider</h1>
     <DataTable columns={[{ key: "name", label: "Nama" }, { key: "baseUrl", label: "Base URL", className: "hidden md:table-cell" }, { key: "sandbox", label: "Mode", render: (v: boolean) => v ? <Badge variant="warning">Sandbox</Badge> : <Badge variant="success">Production</Badge> }, { key: "active", label: "Status", render: (v: boolean) => v ? <Badge variant="success">Aktif</Badge> : <Badge variant="danger">Nonaktif</Badge> }]} data={data} loading={loading} onAdd={openAdd} onEdit={openEdit} onDelete={remove} addLabel="Tambah Provider" emptyMessage="Belum ada provider" />
     <Modal open={modal} onClose={() => setModal(false)} title={editing ? "Edit Provider" : "Tambah Provider"} size="lg">

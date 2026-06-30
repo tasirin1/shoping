@@ -22,7 +22,7 @@ export default function PaymentsPage() {
   }
   const remove = async (p: any) => { if (!confirm("Hapus?")) return; try { await fetch(`/api/admin/payments/${p.id}`, { method: "DELETE" }); toast("success", "Dihapus"); loadData() } catch {} }
 
-  return (<div>
+  return (<div className="min-w-0">
     <h1 className="text-xl font-bold mb-4">Pembayaran</h1>
     <DataTable columns={[{ key: "name", label: "Nama" }, { key: "type", label: "Tipe" }, { key: "active", label: "Status", render: (v: boolean) => v ? <Badge variant="success">Aktif</Badge> : <Badge variant="danger">Nonaktif</Badge> }]} data={data} loading={loading} onAdd={openAdd} onEdit={openEdit} onDelete={remove} addLabel="Tambah Pembayaran" emptyMessage="Belum ada metode pembayaran" />
     <Modal open={modal} onClose={() => setModal(false)} title={editing ? "Edit Pembayaran" : "Tambah Pembayaran"}>

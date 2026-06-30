@@ -76,7 +76,7 @@ function ThemeCard({ theme, active, onActivate, onDuplicate, onDelete, onEdit }:
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">{theme.icon}</span>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-gray-100 flex items-center gap-1.5">
                 {theme.name}
                 {theme.isDefault && <Star className="w-3 h-3 text-yellow-500" />}
@@ -200,7 +200,7 @@ function ThemeEditor({ theme, onSave, onClose }: {
           ))}
 
           {/* Typography */}
-          <div>
+          <div className="min-w-0">
             <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">Typography & Style</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <Input label="Font Family" value={config.fontFamily} onChange={(e) => update("fontFamily", e.target.value)} />
@@ -406,7 +406,7 @@ export default function ThemesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h1 className="text-xl font-bold text-gray-100">Theme Manager</h1>
           <p className="text-sm text-gray-500 mt-0.5">Kelola tema website ({themes.length} tema)</p>
         </div>

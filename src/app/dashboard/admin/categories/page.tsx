@@ -21,7 +21,7 @@ export default function CategoriesPage() {
   }
   const remove = async (c: any) => { if (!confirm("Hapus?")) return; try { await fetch(`/api/admin/categories/${c.id}`, { method: "DELETE" }); toast("success", "Dihapus"); loadData() } catch {} }
 
-  return (<div>
+  return (<div className="min-w-0">
     <h1 className="text-xl font-bold mb-4">Kategori</h1>
     <DataTable columns={[{ key: "name", label: "Nama" }, { key: "slug", label: "Slug", className: "hidden sm:table-cell" }, { key: "sortOrder", label: "Urutan", className: "hidden sm:table-cell" }, { key: "_count", label: "Game", render: (_: any, r: any) => r._count?.games || 0 }]} data={data} loading={loading} onAdd={openAdd} onEdit={openEdit} onDelete={remove} emptyMessage="Belum ada kategori" />
     <Modal open={modal} onClose={() => setModal(false)} title={editing ? "Edit Kategori" : "Tambah Kategori"}>

@@ -20,7 +20,7 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative min-h-[420px] md:min-h-[500px] flex items-center overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-blue-900">
+    <section className="relative py-16 md:py-20 lg:py-24 flex items-center overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-blue-900">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{

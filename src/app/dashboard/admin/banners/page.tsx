@@ -22,7 +22,7 @@ export default function BannersPage() {
   }
   const remove = async (b: any) => { if (!confirm("Hapus banner?")) return; try { await fetch(`/api/admin/banners/${b.id}`, { method: "DELETE" }); toast("success", "Dihapus"); loadData() } catch {} }
 
-  return (<div>
+  return (<div className="min-w-0">
     <h1 className="text-xl font-bold mb-4">Banner</h1>
     <DataTable columns={[{ key: "position", label: "Urutan" }, { key: "title", label: "Judul" }, { key: "subtitle", label: "Subtitle", className: "hidden sm:table-cell" }, { key: "active", label: "Status", render: (v: boolean) => v ? <Badge variant="success">Aktif</Badge> : <Badge variant="danger">Nonaktif</Badge> }]} data={data} loading={loading} onAdd={openAdd} onEdit={openEdit} onDelete={remove} addLabel="Tambah Banner" emptyMessage="Belum ada banner" />
     <Modal open={modal} onClose={() => setModal(false)} title={editing ? "Edit Banner" : "Tambah Banner"} size="lg">

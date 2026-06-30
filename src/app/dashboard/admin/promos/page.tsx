@@ -23,7 +23,7 @@ export default function PromosPage() {
   }
   const remove = async (p: any) => { if (!confirm("Hapus promo?")) return; try { await fetch(`/api/admin/promos/${p.id}`, { method: "DELETE" }); toast("success", "Dihapus"); loadData() } catch {} }
 
-  return (<div>
+  return (<div className="min-w-0">
     <h1 className="text-xl font-bold mb-4">Promo</h1>
     <DataTable columns={[{ key: "code", label: "Kode", render: (v: string) => <span className="font-mono text-primary-600">{v}</span> }, { key: "name", label: "Nama" }, { key: "discount", label: "Diskon", render: (_: any, r: any) => r.discountType === "PERCENTAGE" ? `${r.discount}%` : formatCurrency(r.discount) }, { key: "usedCount", label: "Terpakai", render: (_: any, r: any) => `${r.usedCount}/${r.maxUses || "∞"}` }, { key: "active", label: "Status", render: (v: boolean) => v ? <Badge variant="success">Aktif</Badge> : <Badge variant="danger">Nonaktif</Badge> }]} data={data} loading={loading} onAdd={openAdd} onEdit={openEdit} onDelete={remove} addLabel="Tambah Promo" emptyMessage="Belum ada promo" />
     <Modal open={modal} onClose={() => setModal(false)} title={editing ? "Edit Promo" : "Tambah Promo"} size="lg">

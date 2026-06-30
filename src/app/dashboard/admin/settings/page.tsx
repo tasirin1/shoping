@@ -78,7 +78,7 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div>
+    <div className="min-w-0">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Pengaturan Website</h1>
         <Button onClick={save} loading={saving}><Save className="w-4 h-4 mr-2" />Simpan</Button>

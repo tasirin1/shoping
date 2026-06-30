@@ -72,7 +72,7 @@ export default function NominalsPage() {
   }
 
   return (
-    <div>
+    <div className="min-w-0">
       <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Nominal</h1>
       <DataTable
         columns={[
@@ -99,7 +99,7 @@ export default function NominalsPage() {
 
       <Modal open={modal} onClose={() => setModal(false)} title={editing ? "Edit Nominal" : "Tambah Nominal"} size="lg">
         <div className="space-y-4">
-          <div>
+          <div className="min-w-0">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Game</label>
             <select value={form.gameId} onChange={(e) => setForm({ ...form, gameId: e.target.value })}
               className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 focus:outline-none">

@@ -38,7 +38,7 @@ export default function UsersPage() {
     } catch { toast("error", "Gagal") }
   }
 
-  return (<div>
+  return (<div className="min-w-0">
     <h1 className="text-xl font-bold mb-4">User</h1>
     <DataTable columns={[
       { key: "username", label: "Username" },
