@@ -1,111 +1,183 @@
-# Shoping - Top Up Game Website
+# 🛒 Shoping — Top Up Game Termurah & Tercepat
 
-Platform top up game modern, elegan, dan cepat. Dibangun dengan Next.js 16, TypeScript, dan Tailwind CSS.
+**Platform top up game favoritmu. Ribuan game. Harga termurah. Proses instan. Bisa dipercaya.**
 
-## Fitur
+<p align="center">
+  <a href="#fitur">Fitur</a> •
+  <a href="#game-populer">Game Populer</a> •
+  <a href="#cara-order">Cara Order</a> •
+  <a href="#pembayaran">Pembayaran</a> •
+  <a href="#keunggulan">Keunggulan</a>
+</p>
 
-- **Top Up Game**: Berbagai pilihan game populer dengan harga terbaik
-- **Pencarian Game**: Cari game favorit dengan mudah
-- **Multi Pembayaran**: QRIS, GoPay, OVO, DANA, Virtual Account
-- **Riwayat Pesanan**: Lacak status pesanan secara realtime
-- **Dashboard User**: Kelola akun dan riwayat transaksi
-- **Dashboard Admin**: CRUD Game, Nominal, Promo, Banner, Pesanan, User
-- **Dark Mode**: Tampilan gelap untuk kenyamanan mata
-- **Responsive**: Mobile-first, optimal di semua perangkat
+---
 
-## Teknologi
+## 🚀 Kenapa Shoping?
 
-- **Frontend**: Next.js 16 (App Router), TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, JSON Database
-- **Auth**: Session-based dengan bcryptjs
-- **Deployment**: Docker, Koyeb
+| 💎 | Kenapa Ribuan User Memilih Shoping |
+|---|---|
+| **Harga Termurah** | Kami selalu memberikan harga terbaik untuk semua game |
+| **Proses Instant** | Top up selesai dalam hitungan detik, bukan menit |
+| **24/7 Support** | Tim support siap membantu kapan saja |
+| **Aman & Terpercaya** | Ribuan transaksi berhasil setiap hari |
+| **Banyak Game** | Dari Mobile Legends sampai Genshin Impact, semua ada |
 
-## Persyaratan
+---
 
-- Node.js 20+
-- Docker & Docker Compose (opsional)
+## 🎮 Game Populer
 
-## Instalasi
+| Game | Minimal Top Up |
+|------|---------------|
+| **Mobile Legends** | 86 Diamonds |
+| **Free Fire** | 70 Diamonds |
+| **PUBG Mobile** | 60 UC |
+| **Genshin Impact** | 60 Genesis Crystals |
+| **Valorant** | 475 VP |
+| **Honor of Kings** | 60 Tokens |
+| **Call of Duty Mobile** | 80 CP |
+| **Higgs Domino** | 1 Chip |
+| **Dan masih banyak lagi...** | |
 
-### 1. Clone dan Install Dependencies
+---
+
+## 💳 Metode Pembayaran
+
+Kami mendukung berbagai metode pembayaran favorit kamu:
+
+| Metode | Status |
+|--------|--------|
+| **QRIS** (Semua E-Wallet) | ✅ Aktif |
+| **GoPay** | ✅ Aktif |
+| **OVO** | ✅ Aktif |
+| **DANA** | ✅ Aktif |
+| **ShopeePay** | ✅ Aktif |
+| **Transfer Bank** (BCA, Mandiri, BRI, BNI) | ✅ Aktif |
+| **Virtual Account** | ✅ Aktif |
+
+> Semua pembayaran diproses secara otomatis. Status pesanan berubah realtime.
+
+---
+
+## 📱 Cara Order (Hanya 3 Langkah!)
+
+| Langkah | Aksi |
+|---------|------|
+| **1** | Pilih game favorit kamu |
+| **2** | Masukkan ID game & pilih nominal |
+| **3** | Bayar & terima top up secara instan |
+
+**Selesai!** Game kamu langsung terisi tanpa ribet.
+
+---
+
+## ✨ Fitur Unggulan
+
+### 🌙 Dark Mode
+Nyaman dilihat di malam hari tanpa bikin mata silau.
+
+### 🔍 Pencarian Cepat
+Temukan game favorit dalam hitungan detik.
+
+### 📦 Dashboard Lengkap
+Pantau semua riwayat transaksi dengan mudah.
+
+### 🎨 Theme Kustom
+Ganti tampilan website sesuai selera kamu.
+
+### 🔒 Aman & Terenkripsi
+Data kamu dilindungi dengan sistem keamanan terbaik.
+
+### ⚡ Responsive
+Buka di HP, tablet, atau laptop — tetap nyaman.
+
+---
+
+## 📊 Statistik
+
+| Metrik | Angka |
+|--------|-------|
+| Game Tersedia | 20+ |
+| Metode Pembayaran | 7+ |
+| Proses Top Up | < 1 Menit |
+| Support | 24 Jam |
+
+---
+
+## 🛡️ Keamanan
+
+- ✅ Password dienkripsi (bcrypt)
+- ✅ Session aman dengan cookie HttpOnly
+- ✅ Proteksi CSRF & XSS
+- ✅ Rate limiting untuk mencegah spam
+- ✅ Audit log admin
+- ✅ Validasi input server-side
+- ✅ File upload terproteksi
+
+---
+
+## 🧑‍💻 Untuk Developer
+
+### Teknologi
+
+| Layer | Teknologi |
+|-------|-----------|
+| Frontend | Next.js 16, TypeScript, Tailwind CSS 4 |
+| Backend | Next.js API Routes, JSON Database |
+| Auth | Session-based, bcryptjs |
+| UI | Lucide React, CSS Variables |
+| Deployment | Docker, Koyeb |
+
+### Cara Install Lokal
 
 ```bash
 git clone https://github.com/tasirin1/shoping.git
 cd shoping
 npm install
-```
-
-### 2. Setup Environment
-
-```bash
 cp .env.example .env
-# Edit SESSION_SECRET dengan string acak yang aman
-```
-
-### 3. Jalankan Development
-
-```bash
 npm run dev
 ```
 
 Buka [http://localhost:3000](http://localhost:3000)
 
-### 4. Build Production
+### Login Demo
 
-```bash
-npm run build
-npm start
-```
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | admin@shoping.com | admin123 |
+| **User** | demo@shoping.com | demo123 |
 
-## Docker Deployment
+---
+
+## 🌐 Deployment
+
+Shoping siap di-deploy ke Koyeb, Vercel, atau Docker.
+
+### Docker
 
 ```bash
 docker compose up -d --build
 ```
 
-Aplikasi akan berjalan di [http://localhost:3000](http://localhost:3000)
+### Koyeb
 
-## Deployment ke Koyeb
+1. Push ke GitHub
+2. Hubungkan ke Koyeb
+3. Set `SESSION_SECRET` di environment variables
+4. Deploy 🚀
 
-1. Push repository ke GitHub
-2. Set environment variables di Koyeb:
-   - `NEXT_PUBLIC_APP_URL`: URL aplikasi Koyeb
-   - `SESSION_SECRET`: String acak yang aman
-3. Deploy dari GitHub via Koyeb dashboard
-4. Set `Build Command`:
-   ```
-   npm ci && npm run build
-   ```
-5. Set `Run Command`:
-   ```
-   npm start
-   ```
+---
 
-## Login Default
+## 📞 Kontak
 
-**Admin:**
-- Email: admin@shoping.com
-- Password: admin123
+| Media | Akun |
+|-------|------|
+| WhatsApp | 6281234567890 |
+| Telegram | @shoping |
+| Email | support@shoping.com |
 
-**User:**
-- Email: demo@shoping.com
-- Password: demo123
+---
 
-## Struktur Database
-
-Aplikasi menggunakan file JSON sebagai database lokal yang tersimpan di folder `/database`:
-
-- `users.json` - Data user
-- `games.json` - Data game
-- `products.json` - Data nominal top up
-- `orders.json` - Data pesanan
-- `providers.json` - Data API provider
-- `payments.json` - Data metode pembayaran
-- `banners.json` - Data banner
-- `promos.json` - Data promo
-- `settings.json` - Pengaturan website
-- `logs.json` - Log aktivitas admin
-- `categories.json` - Kategori game
-- `sessions.json` - Sesi login
-
-Database Service (`src/lib/database.ts`) sudah diabstraksi sehingga mudah diganti ke Prisma/PostgreSQL tanpa mengubah logika bisnis.
+<p align="center">
+  <strong>Shoping</strong> — Top Up Game Cepat, Murah & Terpercaya<br />
+  © 2026 Shoping. All rights reserved.
+</p>
