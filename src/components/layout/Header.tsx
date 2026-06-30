@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "./ThemeProvider"
+import { useThemeConfig } from "./ThemeInitializer"
 import {
   ShoppingBag, Sun, Moon, Search, User, LogOut,
   ClipboardList, LayoutDashboard, Shield, Menu, X
@@ -27,6 +28,7 @@ export function Header() {
   const pathname = usePathname()
   const router = useRouter()
   const { resolvedTheme, setTheme } = useTheme()
+  const { config: themeConfig } = useThemeConfig()
 
   useEffect(() => {
     const check = async () => {
@@ -79,10 +81,14 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center">
-              <ShoppingBag className="w-4 h-4 text-white" />
+              {themeConfig.logo ? (
+                <img src={themeConfig.logo} alt={themeConfig.siteName} className="w-5 h-5 object-contain" />
+              ) : (
+                <ShoppingBag className="w-4 h-4 text-white" />
+              )}
             </div>
             <span className="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-              Shoping
+              {themeConfig.siteName || "Shoping"}
             </span>
           </Link>
 

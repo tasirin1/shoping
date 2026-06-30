@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import {
   LayoutDashboard, Package, Gamepad2, Tags, ShoppingBag,
   Users, Image, Ticket, Wallet, Settings, 
-  Menu, PanelLeftClose, Zap, FileText
+  Menu, PanelLeftClose, Zap, FileText, Palette
 } from "lucide-react"
 
 const menuGroups = [
@@ -45,6 +45,7 @@ const menuGroups = [
     label: "Pengaturan",
     items: [
       { href: "/dashboard/admin/settings", label: "Website", icon: Settings },
+      { href: "/dashboard/admin/theme", label: "Tema", icon: Palette },
       { href: "/dashboard/admin/logs", label: "Log Aktivitas", icon: FileText },
     ],
   },

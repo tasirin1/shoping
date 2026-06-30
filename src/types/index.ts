@@ -210,3 +210,62 @@ export type PromoType = Promo
 export type BannerType = Banner
 export type OrderType = Order
 export type UserType = User
+
+// ============================================================
+// Theme Types
+// ============================================================
+
+export interface ThemeConfig {
+  // Brand
+  logo: string
+  logoDark: string
+  favicon: string
+  siteName: string
+  tagline: string
+
+  // Colors
+  primaryColor: string
+  secondaryColor: string
+  accentColor: string
+  buttonColor: string
+  navbarColor: string
+  footerColor: string
+  backgroundColor: string
+  cardColor: string
+  textColor: string
+  linkColor: string
+  successColor: string
+  warningColor: string
+  errorColor: string
+
+  // Style
+  borderRadius: string
+  shadow: string
+  fontFamily: string
+  headingFont: string
+
+  // Content
+  heroImage: string
+  bannerHome: string
+  websiteIcon: string
+  footerText: string
+  copyright: string
+
+  // Social
+  socialFacebook: string
+  socialTwitter: string
+  socialInstagram: string
+  socialYoutube: string
+
+  // Preset
+  preset: string
+}
+
+export type ThemePresetName = "default" | "blue" | "dark" | "emerald" | "purple" | "orange"
+
+export interface ThemePreset {
+  name: string
+  slug: ThemePresetName
+  label: string
+  colors: Partial<ThemeConfig>
+}
