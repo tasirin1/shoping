@@ -227,6 +227,74 @@ export interface ThemeConfig {
   primaryColor: string
   secondaryColor: string
   accentColor: string
+  surfaceColor: string
+  navbarColor: string
+  sidebarColor: string
+  footerColor: string
+  buttonColor: string
+  inputColor: string
+  borderColor: string
+  cardColor: string
+  backgroundColor: string
+  textColor: string
+  textSecondary: string
+  linkColor: string
+  successColor: string
+  warningColor: string
+  errorColor: string
+  infoColor: string
+
+  // Style
+  borderRadius: string
+  shadow: string
+  spacing: string
+  fontFamily: string
+  headingFont: string
+  fontSize: string
+
+  // Content
+  heroImage: string
+  bannerHome: string
+  websiteIcon: string
+  footerText: string
+  copyright: string
+
+  // Social
+  socialFacebook: string
+  socialTwitter: string
+  socialInstagram: string
+  socialYoutube: string
+}
+
+export interface ThemeRecord {
+  id: string
+  name: string
+  icon: string
+  isBuiltIn: boolean
+  isDefault: boolean
+  config: ThemeConfig
+}
+
+export interface ThemePreset {
+  name: string
+  slug: string
+  icon: string
+  label: string
+  config: Partial<ThemeConfig>
+}
+
+export interface ThemeConfig {
+  // Brand
+  logo: string
+  logoDark: string
+  favicon: string
+  siteName: string
+  tagline: string
+
+  // Colors
+  primaryColor: string
+  secondaryColor: string
+  accentColor: string
   buttonColor: string
   navbarColor: string
   footerColor: string
@@ -257,15 +325,5 @@ export interface ThemeConfig {
   socialInstagram: string
   socialYoutube: string
 
-  // Preset
-  preset: string
 }
 
-export type ThemePresetName = "default" | "blue" | "dark" | "emerald" | "purple" | "orange"
-
-export interface ThemePreset {
-  name: string
-  slug: ThemePresetName
-  label: string
-  colors: Partial<ThemeConfig>
-}

@@ -1,19 +1,23 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, useCallback } from "react"
 import type { ThemeConfig } from "@/types"
-import { DEFAULT_THEME, themeToCssVars } from "@/lib/theme"
+import { DARK_DEFAULT, applyThemeVars, defaultThemeId } from "@/lib/theme"
 
 interface ThemeConfigContextType {
   config: ThemeConfig
   loading: boolean
   refresh: () => Promise<void>
+  activeThemeId: string
+  setActiveTheme: (id: string) => Promise<void>
 }
 
 const ThemeConfigContext = createContext<ThemeConfigContextType>({
-  config: DEFAULT_THEME,
+  config: DARK_DEFAULT,
   loading: true,
   refresh: async () => {},
+  activeThemeId: defaultThemeId(),
+  setActiveTheme: async () => {},
 })
 
 export function useThemeConfig() {
@@ -21,17 +25,23 @@ export function useThemeConfig() {
 }
 
 export function ThemeInitializer({ children }: { children: React.ReactNode }) {
-  const [config, setConfig] = useState<ThemeConfig>(DEFAULT_THEME)
+  const [config, setConfig] = useState<ThemeConfig>(DARK_DEFAULT)
   const [loading, setLoading] = useState(true)
+  const [activeThemeId, setActiveThemeIdState] = useState(defaultThemeId())
 
-  const loadConfig = async () => {
+  const loadConfig = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/theme")
+      const res = await fetch("/api/admin/themes")
       if (res.ok) {
         const d = await res.json()
         if (d.success && d.data) {
-          setConfig(d.data)
-          applyTheme(d.data)
+          const { themes, activeId } = d.data
+          const active = themes.find((t: any) => t.id === activeId)
+          if (active && active.config) {
+            setConfig(active.config)
+            setActiveThemeIdState(activeId)
+            applyThemeVars(active.config)
+          }
         }
       }
     } catch {
@@ -39,45 +49,35 @@ export function ThemeInitializer({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadConfig()
+  }, [loadConfig])
+
+  const setActiveTheme = useCallback(async (id: string) => {
+    try {
+      const res = await fetch("/api/admin/themes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "activate", themeId: id }),
+      })
+      const d = await res.json()
+      if (d.success) {
+        if (d.data) {
+          setConfig(d.data)
+          applyThemeVars(d.data)
+        }
+        setActiveThemeIdState(id)
+      }
+    } catch {
+      // Silently fail
+    }
   }, [])
 
   return (
-    <ThemeConfigContext.Provider value={{ config, loading, refresh: loadConfig }}>
+    <ThemeConfigContext.Provider value={{ config, loading, refresh: loadConfig, activeThemeId, setActiveTheme }}>
       {children}
     </ThemeConfigContext.Provider>
   )
-}
-
-function applyTheme(config: ThemeConfig) {
-  const root = document.documentElement
-  const vars = themeToCssVars(config)
-
-  for (const [key, value] of Object.entries(vars)) {
-    root.style.setProperty(key, value)
-  }
-
-  // Set favicon
-  if (config.favicon) {
-    let link = document.querySelector<HTMLLinkElement>('link[rel*="icon"]')
-    if (!link) {
-      link = document.createElement("link")
-      link.rel = "icon"
-      document.head.appendChild(link)
-    }
-    link.href = config.favicon
-  }
-
-  // Set site name in document title (fallback)
-  if (config.siteName) {
-    const metaTitle = document.querySelector('meta[name="theme-title"]')
-    if (metaTitle) metaTitle.setAttribute("content", config.siteName)
-  }
-}
-
-export function applyThemeConfig(config: ThemeConfig) {
-  applyTheme(config)
 }

@@ -11,9 +11,9 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "system",
+  theme: "dark", // Default to dark
   setTheme: () => {},
-  resolvedTheme: "light",
+  resolvedTheme: "dark",
 })
 
 export function useTheme() {
@@ -21,14 +21,13 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system")
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light")
+  const [theme, setThemeState] = useState<Theme>("dark") // Default to dark
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark")
 
   useEffect(() => {
     const stored = localStorage.getItem("theme") as Theme | null
-    if (stored) {
-      setThemeState(stored)
-    }
+    // Default to dark if no stored preference
+    setThemeState(stored || "dark")
   }, [])
 
   useEffect(() => {
@@ -36,8 +35,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const updateTheme = () => {
       const root = document.documentElement
-      const isDark =
-        theme === "dark" || (theme === "system" && mediaQuery.matches)
+      // Default to dark if theme === "system" and system prefers light, still dark
+      // Actually: if theme is "system", follow system. Otherwise use the set theme.
+      const isDark = theme === "dark" || (theme === "system" && mediaQuery.matches)
 
       root.classList.toggle("dark", isDark)
       setResolvedTheme(isDark ? "dark" : "light")

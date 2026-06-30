@@ -45,7 +45,7 @@ const menuGroups = [
     label: "Pengaturan",
     items: [
       { href: "/dashboard/admin/settings", label: "Website", icon: Settings },
-      { href: "/dashboard/admin/theme", label: "Tema", icon: Palette },
+      { href: "/dashboard/admin/themes", label: "Tema", icon: Palette },
       { href: "/dashboard/admin/logs", label: "Log Aktivitas", icon: FileText },
     ],
   },

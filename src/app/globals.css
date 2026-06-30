@@ -20,11 +20,12 @@
     @apply border-gray-100 dark:border-gray-800;
   }
   body {
-    background-color: var(--color-bg, #f8fafc);
-    color: var(--color-text, #111827);
+    background-color: var(--color-bg, #0a0a1a);
+    color: var(--color-text, #f1f5f9);
     font-family: var(--font-family, Inter, system-ui, sans-serif);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-size: var(--font-size, 16px);
   }
   ::selection {
     background-color: color-mix(in srgb, var(--color-primary, #2563eb) 20%, transparent);
@@ -108,14 +109,9 @@
 }
 
 .card-base {
-  background-color: var(--color-card, #ffffff);
-  border-radius: 1rem;
-  border: 1px solid #f1f5f9;
-}
-
-.dark .card-base {
-  background-color: #030712;
-  border-color: #1f2937;
+  background-color: var(--color-card, #1e293b);
+  border-radius: var(--border-radius, 0.75rem);
+  border: 1px solid var(--color-border, #1e293b);
 }
 
 .card-hover {
@@ -123,10 +119,10 @@
 }
 
 .card-hover:hover {
-  border-color: var(--color-primary, #bfdbfe);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+  border-color: var(--color-primary, #6366f1);
+  box-shadow: var(--shadow-custom, 0 4px 6px -1px rgba(0,0,0,0.3));
 }
 
-.dark .card-hover:hover {
-  border-color: color-mix(in srgb, var(--color-primary, #2563eb) 40%, transparent);
+.card-hover:hover {
+  border-color: color-mix(in srgb, var(--color-primary, #6366f1) 40%, transparent);
 }
