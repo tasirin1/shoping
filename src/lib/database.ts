@@ -135,14 +135,23 @@ function getCached<T>(collection: string): T[] | null {
 }
 
 async function withLock<T>(collection: string, fn: () => Promise<T>): Promise<T> {
-  let currentLock = writeLocks.get(collection) || Promise.resolve()
-  const newLock = currentLock.then(async () => fn()).finally(() => {
-    if (writeLocks.get(collection) === newLock) {
-      writeLocks.delete(collection)
-    }
-  })
-  writeLocks.set(collection, newLock)
-  return newLock
+  const previousLock = writeLocks.get(collection) || Promise.resolve()
+
+  // Execute the function after the previous lock completes
+  const resultPromise = previousLock.then(async () => fn())
+
+  // Store only a void promise in the map for lock serialization
+  const voidLock = resultPromise
+    .then(() => {})
+    .catch(() => {})
+    .finally(() => {
+      if (writeLocks.get(collection) === voidLock) {
+        writeLocks.delete(collection)
+      }
+    })
+
+  writeLocks.set(collection, voidLock)
+  return resultPromise
 }
 
 class DatabaseService {
