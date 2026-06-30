@@ -108,16 +108,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         key={item.href}
                         href={item.href}
                         className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group",
                           active
                             ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
                             : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100",
-                          collapsed && "justify-center px-2"
+                          collapsed && "justify-center px-2 relative"
                         )}
-                        title={collapsed ? item.label : undefined}
                       >
-                        <item.icon className="w-4 h-4 shrink-0" />
+                        <item.icon className={cn("w-4 h-4 shrink-0 transition-transform duration-150", "group-hover:scale-110")} />
                         {!collapsed && <span>{item.label}</span>}
+                        {collapsed && (
+                          <span className="absolute left-full ml-2 px-2 py-1 rounded-lg bg-gray-900 dark:bg-gray-700 text-gray-100 text-xs whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 shadow-lg">
+                            {item.label}
+                          </span>
+                        )}
                       </Link>
                     )
                   })}
@@ -135,6 +139,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
             <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">Admin</span>
+          </div>
+          {/* Breadcrumb */}
+          <div className="hidden sm:flex items-center gap-2 px-4 md:px-6 lg:px-8 pt-4 md:pt-6 lg:pt-8 pb-0">
+            <nav className="flex items-center gap-1.5 text-xs text-gray-400">
+              <span>Admin</span>
+              {(() => {
+                const path = pathname.replace("/dashboard/admin", "").replace(/\/$/, "")
+                if (!path) return <><span className="text-gray-600">/</span><span className="text-gray-600 font-medium">Dashboard</span></>
+                const parts = path.split("/").filter(Boolean)
+                return parts.map((part, i) => (
+                  <span key={part} className="flex items-center gap-1.5">
+                    <span className="text-gray-600">/</span>
+                    <span className={i === parts.length - 1 ? "text-gray-600 font-medium" : ""}>
+                      {part.charAt(0).toUpperCase() + part.slice(1)}
+                    </span>
+                  </span>
+                ))
+              })()}
+            </nav>
           </div>
           <div className="p-4 md:p-6 lg:p-8">
             {children}

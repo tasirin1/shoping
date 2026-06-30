@@ -17,9 +17,28 @@ export async function GET() {
     const pendingOrders = orders.filter((o: any) => o.status === "PENDING").length
     const successOrders = orders.filter((o: any) => o.status === "SUCCESS").length
 
+    // Today's stats
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const yesterdayStart = new Date(todayStart.getTime() - 86400000)
+
+    const todayOrders = orders.filter((o: any) => new Date(o.createdAt) >= todayStart)
+    const yesterdayOrders = orders.filter((o: any) => {
+      const d = new Date(o.createdAt)
+      return d >= yesterdayStart && d < todayStart
+    })
+
+    const revenueToday = todayOrders.filter((o: any) => o.status === "SUCCESS").reduce((sum: number, o: any) => sum + (o.total || 0), 0)
+    const revenueYesterday = yesterdayOrders.filter((o: any) => o.status === "SUCCESS").reduce((sum: number, o: any) => sum + (o.total || 0), 0)
+    const ordersToday = todayOrders.length
+
     // Recent orders
-    const recentOrders = orders.sort((a: any, b: any) => (a.createdAt > b.createdAt ? -1 : 1)).slice(0, 10)
-    const enrichedRecent = recentOrders.map((o: any) => ({ ...o, game: games.find((g: any) => g.id === o.gameId) || null, user: allUsers.find((u: any) => u.id === o.userId) || null }))
+    const recentOrders = [...orders].sort((a: any, b: any) => (a.createdAt > b.createdAt ? -1 : 1)).slice(0, 10)
+    const enrichedRecent = recentOrders.map((o: any) => ({
+      ...o,
+      game: games.find((g: any) => g.id === o.gameId) || null,
+      user: allUsers.find((u: any) => u.id === o.userId) || null,
+    }))
 
     // Popular games
     const gameCounts: Record<string, { count: number; revenue: number }> = {}
@@ -35,6 +54,16 @@ export async function GET() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
 
-    return NextResponse.json({ success: true, data: { totalOrders, totalRevenue, totalUsers, pendingOrders, successOrders, recentOrders: enrichedRecent, popularGames } })
-  } catch { return NextResponse.json({ success: false, error: "Error" }, { status: 500 }) }
+    return NextResponse.json({
+      success: true,
+      data: {
+        totalOrders, totalRevenue, totalUsers, pendingOrders, successOrders,
+        recentOrders: enrichedRecent, popularGames,
+        revenueToday, revenueYesterday, ordersToday,
+      },
+    })
+  } catch (error) {
+    console.error("Stats error:", error)
+    return NextResponse.json({ success: false, error: "Gagal memuat statistik" }, { status: 500 })
+  }
 }

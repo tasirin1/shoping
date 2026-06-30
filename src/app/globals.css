@@ -126,3 +126,97 @@
 .card-hover:hover {
   border-color: color-mix(in srgb, var(--color-primary, #6366f1) 40%, transparent);
 }
+
+/* ============================================================
+   Desktop / Large Screen Optimizations
+   ============================================================ */
+
+/* Max width container for large screens */
+.max-w-desktop {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Scrollbar styling for desktop */
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+/* Large screen grid columns auto-adjust */
+@media (min-width: 1280px) {
+  .grid-auto-xl {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (min-width: 1536px) {
+  .grid-auto-2xl {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+/* Sticky columns for tables */
+.sticky-col-left {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: inherit;
+}
+
+.sticky-col-right {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  background: inherit;
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+}
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #1f2937;
+  color: #f1f5f9;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+}
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-primary, #6366f1);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* Remove focus outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
