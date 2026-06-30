@@ -6,25 +6,74 @@ import { rateLimitKey, rateLimitResponse } from "@/lib/rate-limiter"
 import { validateFields } from "@/lib/validate"
 import type { ValidationField } from "@/lib/validate"
 
+// Registration fields
 const registerFields: ValidationField[] = [
-  { key: "email", label: "Email", type: "email", required: true, maxLength: 255 },
-  { key: "username", label: "Username", type: "string", required: true, minLength: 3, maxLength: 20, pattern: /^[a-zA-Z0-9_]+$/, patternMessage: "Username hanya boleh huruf, angka, dan underscore" },
-  { key: "password", label: "Password", type: "string", required: true, minLength: 6, maxLength: 128, sanitize: false },
-  { key: "name", label: "Nama", type: "string", required: false, maxLength: 100 },
+  {
+    key: "username", label: "Username", type: "string", required: true,
+    minLength: 4, maxLength: 20,
+    pattern: /^[a-zA-Z0-9_]+$/,
+    patternMessage: "Username hanya boleh huruf, angka, dan underscore (4-20 karakter)",
+    sanitize: true,
+  },
+  {
+    key: "password", label: "Password", type: "string", required: true,
+    minLength: 6, maxLength: 128, sanitize: false,
+  },
+  {
+    key: "email", label: "Email", type: "email", required: false,
+    maxLength: 255,
+  },
 ]
+
+const REG_LIMIT_KEY = "reg_ip_log"
+
+async function getRegLog(): Promise<Record<string, number[]>> {
+  const stored = await db.findOne("settings", "key", REG_LIMIT_KEY)
+  if (stored) {
+    try { return JSON.parse(stored.value) } catch { return {} }
+  }
+  return {}
+}
+
+async function saveRegLog(log: Record<string, number[]>): Promise<void> {
+  const existing = await db.findOne("settings", "key", REG_LIMIT_KEY)
+  const value = JSON.stringify(log)
+  if (existing) await db.update("settings", existing.id, { value })
+  else await db.create("settings", { key: REG_LIMIT_KEY, value })
+}
+
+function cleanupOldEntries(log: Record<string, number[]>, maxAge: number): Record<string, number[]> {
+  const now = Date.now()
+  const result: Record<string, number[]> = {}
+  for (const [ip, timestamps] of Object.entries(log)) {
+    const recent = timestamps.filter((ts) => now - ts < maxAge)
+    if (recent.length > 0) result[ip] = recent
+  }
+  return result
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}))
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"
-    const identifier = body?.email || ip
 
-    // Rate limit check
-    const rl = rateLimitResponse(rateLimitKey(identifier, "register"), "strict")
+    // Rate limit: strict check for register endpoint
+    const rl = rateLimitResponse(rateLimitKey(`register:${ip}`, "register"), "strict")
     if (!rl.allowed) {
       return NextResponse.json(
         { success: false, error: "Terlalu banyak percobaan. Coba lagi nanti." },
         { status: 429, headers: rl.headers }
+      )
+    }
+
+    // IP-based registration limit: max 2 accounts per IP per 24 hours
+    const regLog = await getRegLog()
+    const cleaned = cleanupOldEntries(regLog, 24 * 60 * 60 * 1000)
+    const userRegs = cleaned[ip] || []
+    if (userRegs.length >= 2) {
+      return NextResponse.json(
+        { success: false, error: "Batas pembuatan akun dari jaringan ini telah tercapai. Silakan coba lagi setelah 24 jam." },
+        { status: 429 }
       )
     }
 
@@ -34,41 +83,61 @@ export async function POST(request: Request) {
       const firstError = Object.values(validation.errors)[0]
       return NextResponse.json(
         { success: false, error: firstError },
-        { status: 400, headers: rl.headers }
+        { status: 400 }
       )
     }
 
-    const { email, username, password, name } = validation.sanitized as {
-      email: string
+    const sanitized = validation.sanitized as {
       username: string
       password: string
-      name?: string | null
+      email?: string | null
     }
 
-    // Check for existing user
-    const existing = await db.findFirstOr("users", [
-      { email } as any,
-      { username } as any,
-    ])
+    const username = (sanitized.username as string).trim()
+    const password = sanitized.password as string
+    const email = sanitized.email as string | null
+
+    // Check username uniqueness (case-insensitive)
+    const allUsers = await db.getAll("users")
+    const existing = allUsers.find(
+      (u: any) => u.username?.toLowerCase() === username.toLowerCase()
+    )
     if (existing) {
-      const field = existing.email === email ? "Email" : "Username"
       return NextResponse.json(
-        { success: false, error: `${field} sudah terdaftar` },
-        { status: 409, headers: rl.headers }
+        { success: false, error: "Username sudah terdaftar" },
+        { status: 409 }
       )
+    }
+
+    // Check email uniqueness if provided
+    if (email) {
+      const emailExists = allUsers.find(
+        (u: any) => u.email?.toLowerCase() === email.toLowerCase()
+      )
+      if (emailExists) {
+        return NextResponse.json(
+          { success: false, error: "Email sudah terdaftar" },
+          { status: 409 }
+        )
+      }
     }
 
     const hashed = await hashPassword(password)
     const user = await db.create("users", {
-      email: email as string,
-      username: username as string,
+      username,
+      email: email || undefined,
       password: hashed,
-      name: name ? (name as string) : null,
+      name: null,
       role: "USER",
       phone: "",
       avatar: "",
       suspended: false,
     })
+
+    // Log successful registration for IP tracking
+    if (!cleaned[ip]) cleaned[ip] = []
+    cleaned[ip].push(Date.now())
+    await saveRegLog(cleaned)
 
     await createSession(user.id)
 
@@ -80,12 +149,10 @@ export async function POST(request: Request) {
       message: "Registrasi berhasil",
       data: {
         id: user.id,
-        email: user.email,
         username: user.username,
-        name: user.name,
         role: user.role,
       },
-    }, { headers: rl.headers })
+    })
   } catch (error) {
     console.error("Register error:", error)
     return NextResponse.json(

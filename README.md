@@ -143,8 +143,8 @@ Buka [http://localhost:3000](http://localhost:3000)
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | admin@shoping.com | admin123 |
-| **User** | demo@shoping.com | demo123 |
+| **Admin** | admin | admin123 |
+| **User** | demo | demo123 |
 
 ---
 

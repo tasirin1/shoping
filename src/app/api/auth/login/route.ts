@@ -7,7 +7,7 @@ import { validateFields } from "@/lib/validate"
 import type { ValidationField } from "@/lib/validate"
 
 const loginFields: ValidationField[] = [
-  { key: "email", label: "Email", type: "email", required: true, maxLength: 255 },
+  { key: "username", label: "Username", type: "string", required: true, minLength: 4, maxLength: 20, pattern: /^[a-zA-Z0-9_]+$/, patternMessage: "Username hanya boleh huruf, angka, dan underscore", sanitize: true },
   { key: "password", label: "Password", type: "string", required: true, minLength: 6, maxLength: 128, sanitize: false },
 ]
 
@@ -15,13 +15,13 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}))
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"
-    const identifier = body?.email || ip
+    const identifier = body?.username || ip
 
-    // Rate limit check
+    // Rate limit: 5 attempts per minute per username
     const rl = rateLimitResponse(rateLimitKey(identifier, "login"), "strict")
     if (!rl.allowed) {
       return NextResponse.json(
-        { success: false, error: "Terlalu banyak percobaan login. Coba lagi nanti." },
+        { success: false, error: "Terlalu banyak percobaan. Coba lagi nanti." },
         { status: 429, headers: rl.headers }
       )
     }
@@ -36,30 +36,29 @@ export async function POST(request: Request) {
       )
     }
 
-    const { email, password } = validation.sanitized as { email: string; password: string }
-    const sanitizedEmail = email as string
+    const { username, password } = validation.sanitized as { username: string; password: string }
+    const sanitizedUsername = (username as string).toLowerCase().trim()
 
-    const user = await db.findOne("users", "email", sanitizedEmail)
-    if (!user) {
+    // Find user by username (case-insensitive)
+    const users = await db.getAll("users")
+    const user = users.find(
+      (u: any) => u.username?.toLowerCase() === sanitizedUsername
+    )
+
+    if (!user || user.suspended) {
+      // Generic error — don't reveal whether username exists or account is suspended
       return NextResponse.json(
-        { success: false, error: "Email atau password salah" },
+        { success: false, error: "Username atau password salah" },
         { status: 401, headers: rl.headers }
-      )
-    }
-
-    if (user.suspended) {
-      await createAuditLogWithUser(user.id, "LOGIN_FAILED", "auth", user.id, "Akun dinonaktifkan", ip)
-      return NextResponse.json(
-        { success: false, error: "Akun telah dinonaktifkan. Hubungi admin." },
-        { status: 403, headers: rl.headers }
       )
     }
 
     const isValid = await verifyPassword(password as string, user.password)
     if (!isValid) {
+      // Log failed attempt
       await createAuditLogWithUser(user.id, "LOGIN_FAILED", "auth", user.id, "Password salah", ip)
       return NextResponse.json(
-        { success: false, error: "Email atau password salah" },
+        { success: false, error: "Username atau password salah" },
         { status: 401, headers: rl.headers }
       )
     }
@@ -74,9 +73,7 @@ export async function POST(request: Request) {
       message: "Login berhasil",
       data: {
         id: user.id,
-        email: user.email,
         username: user.username,
-        name: user.name,
         role: user.role,
       },
     }, { headers: rl.headers })
