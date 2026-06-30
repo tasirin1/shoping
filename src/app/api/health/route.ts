@@ -1,21 +1,17 @@
 import { NextResponse } from "next/server"
-import fs from "fs"
-import path from "path"
+import prisma from "@/lib/prisma"
 
 export async function GET() {
   try {
-    const dbDir = path.join(process.cwd(), "database")
-    const dbExists = fs.existsSync(dbDir)
-    const files = dbExists ? fs.readdirSync(dbDir).filter(f => f.endsWith(".json")) : []
-    
+    // Test database connection
+    await prisma.$queryRaw`SELECT 1`
+
     return NextResponse.json({
       status: "ok",
       timestamp: new Date().toISOString(),
       database: {
-        type: "json",
-        path: dbDir,
-        collections: files.length,
-        files: files.filter(f => f !== "backups"),
+        type: "postgresql",
+        connected: true,
       },
     })
   } catch (error) {
@@ -24,7 +20,11 @@ export async function GET() {
       {
         status: "error",
         timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : "Unknown error",
+        database: {
+          type: "postgresql",
+          connected: false,
+        },
+        error: error instanceof Error ? error.message : "Database connection failed",
       },
       { status: 503 }
     )

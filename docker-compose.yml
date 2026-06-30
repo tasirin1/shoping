@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: shoping
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build:
       context: .
@@ -7,9 +24,16 @@ services:
     ports:
       - "3000:3000"
     environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/shoping?schema=public"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
       SESSION_SECRET: "dev-secret-key-change-in-production-abcdef123456"
       NODE_ENV: development
+      RUN_SEED: "true"
     volumes:
       - ./public/uploads:/app/public/uploads
-      - ./database:/app/database
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

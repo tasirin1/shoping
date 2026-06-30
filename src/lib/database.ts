@@ -1,13 +1,12 @@
 // ============================================================
-// Database Service - JSON File Based
+// Database Service — Prisma/PostgreSQL
 // ============================================================
-// This service provides CRUD operations using JSON files as storage.
-// It is designed to be easily replaceable with Prisma/PostgreSQL
-// in production without changing business logic.
+// This service provides the same API as the previous JSON-based
+// service, but uses Prisma ORM with PostgreSQL.
+// All business logic remains unchanged — API routes import `db`
+// and call the same methods: getAll, getById, create, update, etc.
 
-import fs from "fs"
-import path from "path"
-import crypto from "crypto"
+import prisma from "./prisma"
 import type {
   User, Game, Product, Category, Provider, Order,
   PaymentMethod, Promo, Banner, SiteSetting, AuditLog, Session,
@@ -35,123 +34,40 @@ type CollectionMap = {
 
 type CollectionType<N extends CollectionName> = CollectionMap[N]
 
-const DB_DIR = path.join(process.cwd(), "database")
-const BACKUP_DIR = path.join(DB_DIR, "backups")
-
-// In-memory cache for faster reads
-const cache = new Map<string, any[]>()
-const cacheTimestamps = new Map<string, number>()
-const CACHE_TTL = 2000
-
-// File locks to prevent race conditions
-const writeLocks = new Map<string, Promise<void>>()
-
-function getFilePath(collection: CollectionName): string {
-  const fileMap: Record<CollectionName, string> = {
-    users: "users.json",
-    games: "games.json",
-    products: "products.json",
-    orders: "orders.json",
-    providers: "providers.json",
-    payments: "payments.json",
-    banners: "banners.json",
-    promos: "promos.json",
-    settings: "settings.json",
-    logs: "logs.json",
-    categories: "categories.json",
-    sessions: "sessions.json",
+function getPrismaModel(collection: CollectionName) {
+  const models: Record<string, any> = {
+    users: prisma.user,
+    games: prisma.game,
+    products: prisma.product,
+    orders: prisma.order,
+    providers: prisma.provider,
+    payments: prisma.paymentMethod,
+    banners: prisma.banner,
+    promos: prisma.promo,
+    settings: prisma.siteSetting,
+    logs: prisma.auditLog,
+    categories: prisma.category,
+    sessions: prisma.session,
   }
-  return path.join(DB_DIR, fileMap[collection])
+  return models[collection]
 }
 
-function generateId(): string {
-  return crypto.randomUUID()
-}
+function serializeDates(obj: any): any {
+  if (!obj) return obj
+  if (Array.isArray(obj)) return obj.map(serializeDates)
+  if (typeof obj !== "object") return obj
 
-function ensureDbDir(): void {
-  if (!fs.existsSync(DB_DIR)) {
-    fs.mkdirSync(DB_DIR, { recursive: true })
-  }
-  if (!fs.existsSync(BACKUP_DIR)) {
-    fs.mkdirSync(BACKUP_DIR, { recursive: true })
-  }
-}
-
-function ensureFile(collection: CollectionName): void {
-  ensureDbDir()
-  const filePath = getFilePath(collection)
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, "[]", "utf-8")
-  }
-}
-
-function readFileSync(collection: CollectionName): any[] {
-  const filePath = getFilePath(collection)
-  ensureFile(collection)
-  try {
-    const data = fs.readFileSync(filePath, "utf-8")
-    return JSON.parse(data)
-  } catch {
-    return []
-  }
-}
-
-function writeFileSync(collection: CollectionName, data: any[]): void {
-  const filePath = getFilePath(collection)
-  ensureDbDir()
-  createBackup(collection, data)
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8")
-  cache.set(collection, data)
-  cacheTimestamps.set(collection, Date.now())
-}
-
-function createBackup(collection: CollectionName, data: any[]): void {
-  try {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
-    const backupFile = path.join(BACKUP_DIR, `${collection}_${timestamp}.json`)
-    fs.writeFileSync(backupFile, JSON.stringify(data, null, 2), "utf-8")
-    const backupPrefix = `${collection}_`
-    const backups = fs.readdirSync(BACKUP_DIR)
-      .filter(f => f.startsWith(backupPrefix))
-      .sort()
-      .reverse()
-    if (backups.length > 5) {
-      for (const old of backups.slice(5)) {
-        fs.unlinkSync(path.join(BACKUP_DIR, old))
-      }
+  const result: Record<string, any> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    if (value instanceof Date) {
+      result[key] = value.toISOString()
+    } else if (value instanceof Object && !Array.isArray(value) && !(value instanceof Date)) {
+      result[key] = serializeDates(value)
+    } else {
+      result[key] = value
     }
-  } catch {
-    // Silently fail backup
   }
-}
-
-function getCached<T>(collection: string): T[] | null {
-  const cached = cache.get(collection)
-  const timestamp = cacheTimestamps.get(collection)
-  if (cached && timestamp && Date.now() - timestamp < CACHE_TTL) {
-    return cached as T[]
-  }
-  return null
-}
-
-async function withLock<T>(collection: string, fn: () => Promise<T>): Promise<T> {
-  const previousLock = writeLocks.get(collection) || Promise.resolve()
-
-  // Execute the function after the previous lock completes
-  const resultPromise = previousLock.then(async () => fn())
-
-  // Store only a void promise in the map for lock serialization
-  const voidLock = resultPromise
-    .then(() => {})
-    .catch(() => {})
-    .finally(() => {
-      if (writeLocks.get(collection) === voidLock) {
-        writeLocks.delete(collection)
-      }
-    })
-
-  writeLocks.set(collection, voidLock)
-  return resultPromise
+  return result
 }
 
 class DatabaseService {
@@ -160,17 +76,25 @@ class DatabaseService {
   // ============================================================
 
   async getAll<N extends CollectionName>(collection: N): Promise<CollectionType<N>[]> {
-    const cached = getCached<CollectionType<N>>(collection)
-    if (cached) return cached
-    const data = readFileSync(collection) as CollectionType<N>[]
-    cache.set(collection, data)
-    cacheTimestamps.set(collection, Date.now())
-    return data
+    try {
+      const model = getPrismaModel(collection)
+      const data = await model.findMany()
+      return serializeDates(data) as CollectionType<N>[]
+    } catch (error) {
+      console.error(`Database error (getAll ${collection}):`, error)
+      return []
+    }
   }
 
   async getById<N extends CollectionName>(collection: N, id: string): Promise<CollectionType<N> | null> {
-    const data = await this.getAll(collection)
-    return data.find(item => (item as any).id === id) || null
+    try {
+      const model = getPrismaModel(collection)
+      const data = await model.findUnique({ where: { id } })
+      return serializeDates(data) as CollectionType<N> | null
+    } catch (error) {
+      console.error(`Database error (getById ${collection}):`, error)
+      return null
+    }
   }
 
   async getBy<N extends CollectionName>(
@@ -178,8 +102,14 @@ class DatabaseService {
     field: string,
     value: unknown
   ): Promise<CollectionType<N>[]> {
-    const data = await this.getAll(collection)
-    return data.filter(item => (item as any)[field] === value)
+    try {
+      const model = getPrismaModel(collection)
+      const data = await model.findMany({ where: { [field]: value } })
+      return serializeDates(data) as CollectionType<N>[]
+    } catch (error) {
+      console.error(`Database error (getBy ${collection}):`, error)
+      return []
+    }
   }
 
   async findOne<N extends CollectionName>(
@@ -187,38 +117,44 @@ class DatabaseService {
     field: string,
     value: unknown
   ): Promise<CollectionType<N> | null> {
-    const data = await this.getAll(collection)
-    return data.find(item => (item as any)[field] === value) || null
+    try {
+      const model = getPrismaModel(collection)
+      const data = await model.findFirst({ where: { [field]: value } })
+      return serializeDates(data) as CollectionType<N> | null
+    } catch (error) {
+      console.error(`Database error (findOne ${collection}):`, error)
+      return null
+    }
   }
 
   async findFirst<N extends CollectionName>(
     collection: N,
     query: Partial<CollectionType<N>>
   ): Promise<CollectionType<N> | null> {
-    const data = await this.getAll(collection)
-    return data.find(item => {
-      for (const [key, value] of Object.entries(query)) {
-        if ((item as any)[key] !== value) return false
-      }
-      return true
-    }) || null
+    try {
+      const model = getPrismaModel(collection)
+      const data = await model.findFirst({ where: query as any })
+      return serializeDates(data) as CollectionType<N> | null
+    } catch (error) {
+      console.error(`Database error (findFirst ${collection}):`, error)
+      return null
+    }
   }
 
   async findFirstOr<N extends CollectionName>(
     collection: N,
     conditions: Partial<CollectionType<N>>[]
   ): Promise<CollectionType<N> | null> {
-    const data = await this.getAll(collection)
-    return data.find(item => {
-      for (const condition of conditions) {
-        let matches = true
-        for (const [key, value] of Object.entries(condition)) {
-          if ((item as any)[key] !== value) { matches = false; break }
-        }
-        if (matches) return true
-      }
-      return false
-    }) || null
+    try {
+      const model = getPrismaModel(collection)
+      const data = await model.findFirst({
+        where: { OR: conditions.map((cond) => cond as any) },
+      })
+      return serializeDates(data) as CollectionType<N> | null
+    } catch (error) {
+      console.error(`Database error (findFirstOr ${collection}):`, error)
+      return null
+    }
   }
 
   // ============================================================
@@ -229,18 +165,17 @@ class DatabaseService {
     collection: N,
     data: Partial<CollectionType<N>>
   ): Promise<CollectionType<N>> {
-    return withLock(collection, async () => {
-      const items = readFileSync(collection) as any[]
-      const newItem = {
-        id: generateId(),
-        ...data,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-      items.push(newItem)
-      writeFileSync(collection, items)
-      return newItem as CollectionType<N>
-    })
+    const createData = { ...data } as any
+    if (createData.id === "") delete createData.id
+
+    try {
+      const model = getPrismaModel(collection)
+      const result = await model.create({ data: createData })
+      return serializeDates(result) as CollectionType<N>
+    } catch (error) {
+      console.error(`Database error (create ${collection}):`, error)
+      throw error
+    }
   }
 
   async update<N extends CollectionName>(
@@ -248,60 +183,56 @@ class DatabaseService {
     id: string,
     data: Partial<CollectionType<N>>
   ): Promise<CollectionType<N> | null> {
-    return withLock(collection, async () => {
-      const items = readFileSync(collection) as any[]
-      const index = items.findIndex(item => item.id === id)
-      if (index === -1) return null
-      items[index] = {
-        ...items[index],
-        ...data,
-        id: items[index].id,
-        createdAt: items[index].createdAt,
-        updatedAt: new Date().toISOString(),
-      }
-      writeFileSync(collection, items)
-      return items[index] as CollectionType<N>
-    })
+    try {
+      const model = getPrismaModel(collection)
+      const result = await model.update({ where: { id }, data })
+      return serializeDates(result) as CollectionType<N>
+    } catch (error) {
+      console.error(`Database error (update ${collection}):`, error)
+      return null
+    }
   }
 
-  async delete<N extends CollectionName>(collection: N, id: string): Promise<boolean> {
-    return withLock(collection, async () => {
-      const items = readFileSync(collection) as any[]
-      const index = items.findIndex(item => item.id === id)
-      if (index === -1) return false
-      items.splice(index, 1)
-      writeFileSync(collection, items)
+  async delete<N extends CollectionName>(
+    collection: N,
+    id: string
+  ): Promise<boolean> {
+    try {
+      const model = getPrismaModel(collection)
+      await model.delete({ where: { id } })
       return true
-    })
+    } catch (error) {
+      console.error(`Database error (delete ${collection}):`, error)
+      return false
+    }
   }
 
   async deleteMany<N extends CollectionName>(
     collection: N,
     query: Partial<CollectionType<N>>
   ): Promise<boolean> {
-    return withLock(collection, async () => {
-      let items = readFileSync(collection) as any[]
-      const filtered = items.filter(item => {
-        for (const [key, value] of Object.entries(query)) {
-          if ((item as any)[key] === value) return false
-        }
-        return true
-      })
-      if (filtered.length === items.length) return false
-      writeFileSync(collection, filtered)
+    try {
+      const model = getPrismaModel(collection)
+      await model.deleteMany({ where: query as any })
       return true
-    })
+    } catch (error) {
+      console.error(`Database error (deleteMany ${collection}):`, error)
+      return false
+    }
   }
 
-  async count<N extends CollectionName>(collection: N, query?: Partial<CollectionType<N>>): Promise<number> {
-    const data = await this.getAll(collection)
-    if (!query) return data.length
-    return data.filter(item => {
-      for (const [key, value] of Object.entries(query)) {
-        if ((item as any)[key] !== value) return false
-      }
-      return true
-    }).length
+  async count<N extends CollectionName>(
+    collection: N,
+    query?: Partial<CollectionType<N>>
+  ): Promise<number> {
+    try {
+      const model = getPrismaModel(collection)
+      if (query) return await model.count({ where: query as any })
+      return await model.count()
+    } catch (error) {
+      console.error(`Database error (count ${collection}):`, error)
+      return 0
+    }
   }
 
   async paginate<N extends CollectionName>(
@@ -317,40 +248,56 @@ class DatabaseService {
     limit: number
     totalPages: number
   }> {
-    let data = await this.getAll(collection)
-    data.sort((a: any, b: any) => {
-      const aVal = a[sortField] || ""
-      const bVal = b[sortField] || ""
-      return sortOrder === "asc" ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1)
-    })
-    const total = data.length
-    const totalPages = Math.ceil(total / limit)
-    const skip = (page - 1) * limit
-    const paged = data.slice(skip, skip + limit)
-    return { data: paged as CollectionType<N>[], total, page, limit, totalPages }
+    try {
+      const model = getPrismaModel(collection)
+      const skip = (page - 1) * limit
+
+      const [items, total] = await Promise.all([
+        model.findMany({
+          skip,
+          take: limit,
+          orderBy: { [sortField]: sortOrder },
+        }),
+        model.count(),
+      ])
+
+      return {
+        data: serializeDates(items) as CollectionType<N>[],
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      }
+    } catch (error) {
+      console.error(`Database error (paginate ${collection}):`, error)
+      return { data: [], total: 0, page, limit, totalPages: 0 }
+    }
   }
+
+  // ============================================================
+  // Aggregation helpers
+  // ============================================================
 
   async sum<N extends CollectionName>(
     collection: N,
     field: string,
     query?: Partial<CollectionType<N>>
   ): Promise<number> {
-    const data = await this.getAll(collection)
-    let filtered = data
-    if (query) {
-      filtered = data.filter(item => {
-        for (const [key, value] of Object.entries(query)) {
-          if ((item as any)[key] !== value) return false
-        }
-        return true
-      })
+    try {
+      const model = getPrismaModel(collection)
+      const result = query
+        ? await model.aggregate({ _sum: { [field]: true }, where: query as any })
+        : await model.aggregate({ _sum: { [field]: true } })
+
+      return (result._sum as any)?.[field] || 0
+    } catch (error) {
+      console.error(`Database error (sum ${collection}):`, error)
+      return 0
     }
-    return filtered.reduce((sum, item) => sum + (Number((item as any)[field]) || 0), 0)
   }
 
   async clearCache(): Promise<void> {
-    cache.clear()
-    cacheTimestamps.clear()
+    // No-op: Prisma handles its own connection pooling
   }
 }
 

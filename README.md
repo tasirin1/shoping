@@ -177,10 +177,34 @@ npm run build
 npm start
 ```
 
-### Docker
+### Database Migration
+
+```bash
+# Sync schema tanpa migration files (untuk development)
+npx prisma db push
+
+# Atau buat migration files (untuk production)
+npx prisma migrate dev --name init
+
+# Apply migration di production
+npx prisma migrate deploy
+```
+
+### Docker (Development)
 
 ```bash
 docker compose up -d --build
+```
+
+### Docker (Production)
+
+```bash
+docker build -t shoping .
+docker run -p 3000:3000 \
+  -e DATABASE_URL="postgresql://..." \
+  -e SESSION_SECRET="your-secret" \
+  -e RUN_SEED="true" \
+  shoping
 ```
 
 ---
@@ -202,16 +226,24 @@ Shoping dapat di-deploy ke berbagai platform:
 
 1. Push repository ke GitHub
 2. Hubungkan ke Koyeb
-3. Set environment variable `SESSION_SECRET`
-4. Build command: `npm ci && npm run build`
-5. Run command: `npm start`
+3. Add PostgreSQL database (Koyeb PostgreSQL add-on)
+4. Set environment variables di Koyeb Dashboard:
+   - `DATABASE_URL` — dari Koyeb PostgreSQL add-on
+   - `SESSION_SECRET` — random string minimal 32 karakter
+   - `RUN_SEED` — `true` hanya untuk deploy pertama
+5. Build command: `npm ci && npm run build`
+6. Run command: `sh start.sh` (menjalankan migration + seed + server)
 
 ### Environment Variables
 
-| Variable | Deskripsi | Default |
-|----------|-----------|---------|
-| `NEXT_PUBLIC_APP_URL` | URL aplikasi | `http://localhost:3000` |
-| `SESSION_SECRET` | Secret untuk session (ubah di production) | - |
+| Variable | Deskripsi | Wajib | Default |
+|----------|-----------|-------|---------|
+| `DATABASE_URL` | Connection string PostgreSQL | ✅ | - |
+| `SESSION_SECRET` | Secret untuk session (ubah di production) | ✅ | - |
+| `NEXT_PUBLIC_APP_URL` | URL aplikasi | ❌ | `http://localhost:3000` |
+| `NEXT_PUBLIC_CAPTCHA_SITE_KEY` | reCAPTCHA site key (opsional) | ❌ | - |
+| `RUN_SEED` | Jalankan seed saat startup (`true`/`false`) | ❌ | `false` |
+| `MAX_UPLOAD_SIZE` | Maksimal ukuran upload (bytes) | ❌ | `5242880` |
 
 ---
 
