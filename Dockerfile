@@ -14,6 +14,10 @@ RUN npx prisma generate
 # Sync schema if DATABASE_URL is available during build (e.g. Koyeb build env)
 RUN npx prisma db push --accept-data-loss || echo "⚠️ Schema sync skipped (DATABASE_URL not available during build)"
 
+# Seed database if DATABASE_URL is available during build
+# Uses upsert so safe to run on every build — won't duplicate data
+RUN npx tsx prisma/seed.ts || echo "⚠️ Seed skipped (DATABASE_URL not available during build)"
+
 # Build Next.js standalone
 RUN npm run build
 
@@ -32,10 +36,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy Prisma Client files needed at runtime (NOT Prisma CLI)
-# .prisma/client: generated client code
-# @prisma/client: client library
-# @prisma/engines: native query engine binary (.so.node) for DB communication
+# Copy only Prisma Client files needed at runtime (NOT Prisma CLI)
 COPY --from=builder /app/node_modules/.prisma/client ./node_modules/.prisma/client
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=builder /app/node_modules/@prisma/engines/libquery_engine-*.node ./node_modules/@prisma/engines/
