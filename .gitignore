@@ -48,3 +48,13 @@ next-env.d.ts
 
 # JSON database files (legacy - project now uses PostgreSQL)
 /database
+
+# OpenNext
+.open-next
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+
+!.env.example
