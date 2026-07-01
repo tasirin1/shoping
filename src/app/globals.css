@@ -290,7 +290,7 @@ svg {
   .card-hover:hover {
     transform: none !important;
   }
-  .group-hover\\:scale-110:hover {
+  .touch-hover-scale {
     transform: none !important;
   }
 }

@@ -29,9 +29,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy Prisma schema, config, migrations, and CLI for runtime
+# Copy Prisma schema and CLI for runtime migrations
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
@@ -41,7 +40,7 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/start.sh ./start.sh
 
 # Create uploads directory
-RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public /app/prisma /app/prisma.config.ts /app/node_modules/.prisma
+RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public /app/prisma /app/node_modules/.prisma
 
 USER nextjs
 
