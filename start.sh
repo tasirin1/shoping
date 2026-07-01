@@ -5,7 +5,7 @@
 set -e
 
 echo "⏳ Syncing database schema..."
-npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || {
+npx prisma db push --accept-data-loss 2>&1 || {
   echo "❌ Failed to sync database schema. Check DATABASE_URL."
   echo "   Ensure PostgreSQL is accessible and the connection string is correct."
   exit 1
