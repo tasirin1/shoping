@@ -11,13 +11,6 @@ COPY . .
 # Generate Prisma Client (doesn't need database connection)
 RUN npx prisma generate
 
-# Sync schema if DATABASE_URL is available during build (e.g. Koyeb build env)
-RUN npx prisma db push --accept-data-loss || echo "⚠️ Schema sync skipped (DATABASE_URL not available during build)"
-
-# Seed database if DATABASE_URL is available during build
-# Uses upsert so safe to run on every build — won't duplicate data
-RUN npx tsx prisma/seed.ts || echo "⚠️ Seed skipped (DATABASE_URL not available during build)"
-
 # Build Next.js standalone
 RUN npm run build
 
@@ -36,16 +29,33 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy only Prisma Client files needed at runtime (NOT Prisma CLI)
+# Copy Prisma schema + seed files (needed for db push + seed at startup)
+COPY --from=builder /app/prisma ./prisma
+
+# Copy Prisma Client runtime files
 COPY --from=builder /app/node_modules/.prisma/client ./node_modules/.prisma/client
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
-COPY --from=builder /app/node_modules/@prisma/engines/libquery_engine-*.node ./node_modules/@prisma/engines/
+COPY --from=builder /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
+
+# Copy Prisma CLI for runtime db push
+COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+
+# Copy tsx for running seed
+COPY --from=builder /app/node_modules/.bin/tsx ./node_modules/.bin/tsx
+COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
+COPY --from=builder /app/node_modules/esbuild ./node_modules/esbuild
+COPY --from=builder /app/node_modules/get-tsconfig ./node_modules/get-tsconfig
+COPY --from=builder /app/node_modules/resolve-pkg-maps ./node_modules/resolve-pkg-maps
+
+# Copy bcryptjs (used by seed for password hashing)
+COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
 
 # Copy startup script
 COPY --from=builder /app/start.sh ./start.sh
 
 # Create uploads directory
-RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public
+RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public /app/prisma
 
 USER nextjs
 

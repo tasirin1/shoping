@@ -10,7 +10,7 @@ async function main() {
   const adminPassword = await bcrypt.hash("admin123", 12)
   const demoPassword = await bcrypt.hash("demo123", 12)
 
-  await prisma.user.upsert({
+  const adminUser = await prisma.user.upsert({
     where: { username: "admin" },
     update: {},
     create: {
@@ -23,8 +23,13 @@ async function main() {
       avatar: "",
     },
   })
+  if (adminUser.createdAt === adminUser.updatedAt) {
+    console.log("  ✓ Admin account created (admin / admin123)")
+  } else {
+    console.log("  ✓ Admin account already exists")
+  }
 
-  await prisma.user.upsert({
+  const demoUser = await prisma.user.upsert({
     where: { username: "demo" },
     update: {},
     create: {
@@ -37,6 +42,11 @@ async function main() {
       avatar: "",
     },
   })
+  if (demoUser.createdAt === demoUser.updatedAt) {
+    console.log("  ✓ Demo account created (demo / demo123)")
+  } else {
+    console.log("  ✓ Demo account already exists")
+  }
 
   // Create categories
   const categories = [
