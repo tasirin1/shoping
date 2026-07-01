@@ -1,21 +1,32 @@
 import { PrismaClient } from "@prisma/client"
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
+let prismaInstance: PrismaClient | null = null
 
-function createPrismaClient(): PrismaClient {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL environment variable is required but not set. Please configure PostgreSQL connection.")
+function getPrisma(): PrismaClient {
+  if (!prismaInstance) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error(
+        "DATABASE_URL environment variable is required but not set. Please configure PostgreSQL connection."
+      )
+    }
+    prismaInstance = new PrismaClient({
+      datasourceUrl: process.env.DATABASE_URL,
+      log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    })
   }
-  return new PrismaClient({
-    datasourceUrl: process.env.DATABASE_URL,
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
-  })
+  return prismaInstance
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient()
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma
-}
+// Proxy defers PrismaClient creation until first property access (e.g. prisma.user)
+export const prisma = new Proxy<PrismaClient>({} as PrismaClient, {
+  get(_, prop: string | symbol) {
+    // Handle special symbols (e.g. then for Promise detection)
+    if (typeof prop === "symbol") {
+      // If the symbol is for then/catch, PrismaClient isn't thenable - return undefined
+      return undefined
+    }
+    return (getPrisma() as any)[prop]
+  },
+})
 
 export default prisma

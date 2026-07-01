@@ -6,6 +6,8 @@ import { rateLimitKey, rateLimitResponse } from "@/lib/rate-limiter"
 import { validateFields } from "@/lib/validate"
 import type { ValidationField } from "@/lib/validate"
 
+export const dynamic = "force-dynamic"
+
 // Registration fields
 const registerFields: ValidationField[] = [
   {

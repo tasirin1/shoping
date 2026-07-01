@@ -3,6 +3,8 @@ import { db } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
 import { sanitizeInput } from "@/lib/utils"
 
+export const dynamic = "force-dynamic"
+
 function generateInvoice(): string {
   const date = new Date()
   const d = date.getFullYear().toString() + (date.getMonth() + 1).toString().padStart(2, "0") + date.getDate().toString().padStart(2, "0")

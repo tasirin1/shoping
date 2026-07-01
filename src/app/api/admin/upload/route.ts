@@ -6,6 +6,8 @@ import crypto from "crypto"
 import { rateLimitKey, rateLimitResponse } from "@/lib/rate-limiter"
 import { createAuditLog } from "@/lib/audit"
 
+export const dynamic = "force-dynamic"
+
 const ALLOWED_EXTS = new Set([".png", ".jpg", ".jpeg", ".svg", ".webp", ".gif", ".ico"])
 const ALLOWED_MIMES = [
   "image/png", "image/jpeg", "image/svg+xml",

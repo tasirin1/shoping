@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/database"
 
+export const dynamic = "force-dynamic"
+
 export async function POST(request: Request) {
   try {
     const { invoice, status } = await request.json()

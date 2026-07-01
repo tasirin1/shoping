@@ -6,6 +6,8 @@ import { createAuditLog } from "@/lib/audit"
 import { ALL_BUILTIN_THEMES, cloneTheme, defaultThemeId } from "@/lib/theme"
 import type { ThemeRecord } from "@/types"
 
+export const dynamic = "force-dynamic"
+
 const THEMES_KEY = "theme_library"
 const ACTIVE_KEY = "theme_active_id"
 

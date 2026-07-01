@@ -3,6 +3,8 @@ import { db } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
 import { createAuditLog } from "@/lib/audit"
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   try {
     const user = await getCurrentUser()

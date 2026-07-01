@@ -6,6 +6,8 @@ import { rateLimitKey, rateLimitResponse } from "@/lib/rate-limiter"
 import { validateFields } from "@/lib/validate"
 import type { ValidationField } from "@/lib/validate"
 
+export const dynamic = "force-dynamic"
+
 const loginFields: ValidationField[] = [
   { key: "username", label: "Username", type: "string", required: true, minLength: 4, maxLength: 20, pattern: /^[a-zA-Z0-9_]+$/, patternMessage: "Username hanya boleh huruf, angka, dan underscore", sanitize: true },
   { key: "password", label: "Password", type: "string", required: true, minLength: 6, maxLength: 128, sanitize: false },
